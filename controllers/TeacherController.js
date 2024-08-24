@@ -1,7 +1,76 @@
 const Teacher = require("../models/Teacher");
+const UnverifiedTeacher = require("../models/UnverifiedTeacher");
 const { sendOtpToEmail } = require("../config/nodemailer");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto"); 
+
+const signUp = async (req, res) => {
+    const { name, email, mobileNumber, password } = req.body;
+
+    try {
+        const existingTeacher = await UnverifiedTeacher.findOne({ email });
+        if (existingTeacher) {
+            return res.status(400).json({ error: "User already exists." });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const otp = Math.floor(100000 + Math.random() * 900000);
+        const otpExpiry = Date.now() + 2 * 24 * 60 * 60 * 1000; //2days
+
+        const newTeacher = new UnverifiedTeacher({
+            name,
+            email,
+            mobileNumber,
+            password: hashedPassword,
+            otp,
+            otpExpiry
+        });
+
+        await newTeacher.save();
+
+        // Custom text for the email sent to the admin
+        const customText = `${name} is trying to sign up. His email is ${email} and the OTP is ${otp}.`;
+
+        // Send OTP to admin
+        await sendOtpToEmail(process.env.ADMIN_EMAIL, otp, customText); 
+
+        res.status(200).json({ message: "OTP sent to admin. Awaiting verification." });
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
+
+const verifyOtppasscode = async (req, res) => {
+    const { email, otp } = req.body;
+
+    try {
+        const unverifiedTeacher = await UnverifiedTeacher.findOne({ email });
+
+        if (!unverifiedTeacher) {
+            return res.status(404).json({ error: "Unverified user not found." });
+        }
+
+        if (unverifiedTeacher.otp !== otp || unverifiedTeacher.otpExpiry < Date.now()) {
+            return res.status(400).json({ error: "Invalid or expired OTP." });
+        }
+
+        const { name, mobileNumber, password } = unverifiedTeacher;
+        const teacher = new Teacher({
+            name,
+            email,
+            mobileNumber,
+            password,
+        });
+
+        await teacher.save();
+        await UnverifiedTeacher.deleteOne({ email });
+
+        res.status(200).json({ success: true, message: "Verification successful. You can now log in." });
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
+};
 
 const login = async (req, res) => {
     const { email, password } = req.body;
@@ -97,4 +166,6 @@ module.exports = {
     login,
     verifyOtp,
    verifySession,
+   signUp,
+   verifyOtppasscode
 };

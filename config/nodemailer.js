@@ -11,13 +11,13 @@ const transporter = nodemailer.createTransport({
 });
 
 // Function to send OTP via email
-exports.sendOtpToEmail = async (email, otp) => {
+exports.sendOtpToEmail = async (email, otp, text) => {
   try {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Your OTP Code",
-      text: `Your OTP code is ${otp}`,
+      text: text || `Your OTP code is ${otp}`, // Use the provided text or a default message
     });
     console.log("OTP sent successfully via email");
   } catch (error) {
