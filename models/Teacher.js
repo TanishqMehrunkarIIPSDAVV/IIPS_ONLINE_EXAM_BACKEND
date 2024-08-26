@@ -14,6 +14,8 @@ const teacherSchema = new mongoose.Schema({
       expiresAt: { type: Date }, // Expiry time for the session
     },
   ],
+  resetPasswordToken: { type: String }, // Field for storing the hashed reset token
+  resetPasswordExpiry: { type: Date }, // Field for storing the token expiry time
 }, {
   timestamps: true, 
 });

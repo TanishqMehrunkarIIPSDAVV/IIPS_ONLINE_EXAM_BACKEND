@@ -25,3 +25,17 @@ exports.sendOtpToEmail = async (email, otp, text) => {
     throw new Error("Failed to send OTP email");
   }
 };
+exports.sendResetLinkToEmail = async (email, resetLink) => {
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Password Reset Request",
+      text: `You requested a password reset. Click the link below to reset your password:\n\n${resetLink}\n\nIf you did not request this, please ignore this email.`, 
+    });
+    console.log("Password reset link sent successfully via email");
+  } catch (error) {
+    console.error("Error sending password reset email:", error);
+    throw new Error("Failed to send password reset email");
+  }
+};

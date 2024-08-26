@@ -1,7 +1,7 @@
 const Teacher = require("../models/Teacher");
 const UnverifiedTeacher = require("../models/UnverifiedTeacher");
-const { sendOtpToEmail } = require("../config/nodemailer");
-const bcrypt = require("bcrypt");
+const { sendOtpToEmail, sendResetLinkToEmail } = require("../config/nodemailer");
+const bcrypt = require("bcrypt"); 
 const crypto = require("crypto"); 
 
 const signUp = async (req, res) => {
@@ -162,10 +162,81 @@ const verifySession = async (req, res) => {
     }
 };
 
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const teacher = await Teacher.findOne({ email });
+
+        if (!teacher) {
+            return res.status(404).json({ error: "Teacher not found" });
+        }
+
+        // Generate a reset token
+        const resetToken = crypto.randomBytes(32).toString("hex");
+
+        // Hash the reset token before saving to the database
+        const hashedToken = await bcrypt.hash(resetToken, 10);
+
+        // Set token expiry time (10 minutes from now)
+        const tokenExpiry = Date.now() + 10 * 60 * 1000;
+
+        // Save the hashed token and expiry in the database
+        teacher.resetPasswordToken = hashedToken;
+        teacher.resetPasswordExpiry = tokenExpiry;
+        await teacher.save();
+   
+        // Construct the reset link
+        const resetLink = `${process.env.FRONTEND_URL}/reset_password?token=${resetToken}&email=${email}`;
+        
+        // Send the reset link to the teacher's email
+        await sendResetLinkToEmail(email, resetLink);
+
+        res.status(200).json({ message: "Password reset link sent successfully" });
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
+};
+const resetPassword = async (req, res) => {
+    const { token, email, newPassword } = req.body;
+ 
+    try {
+        const teacher = await Teacher.findOne({ email });
+
+        if (!teacher) {
+            return res.status(404).json({ error: "Teacher not found" });
+        }
+
+        // Verify the reset token
+        const isTokenValid = await bcrypt.compare(token, teacher.resetPasswordToken);
+        console.log("reset")
+
+        if (!isTokenValid || Date.now() > teacher.resetPasswordExpiry) {
+            return res.status(400).json({ error: "Invalid or expired token" });
+        }
+
+        // Hash the new password and update it
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        teacher.password = hashedPassword;
+
+        // Clear the reset token and expiry
+        teacher.resetPasswordToken = null;
+        teacher.resetPasswordExpiry = null;
+
+        await teacher.save();
+
+        res.status(200).json({ message: "Password reset successfully" });
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
 module.exports = {
     login,
     verifyOtp,
    verifySession,
    signUp,
-   verifyOtppasscode
+   verifyOtppasscode,
+   forgotPassword,
+   resetPassword,
 };
