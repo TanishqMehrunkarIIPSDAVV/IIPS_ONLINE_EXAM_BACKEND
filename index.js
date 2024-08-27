@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const TeacherRoutes = require("./routes/Teacherroutes");
+const PaperRoutes = require("./routes/Paperroutes");
 const cors = require("cors"); // Add this line
 require("dotenv").config();
 const { removeExpiredSessions } = require('./utils/sessionCleanup');
@@ -34,6 +35,7 @@ mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTop
     cookie: { secure: false } // secure should be true if using HTTPS
   }));
 app.use("/teacher", TeacherRoutes);
+app.use("/paper",PaperRoutes);
 
 //cleaning session
 setInterval(removeExpiredSessions,  30 *60 * 1000);// every 30 min

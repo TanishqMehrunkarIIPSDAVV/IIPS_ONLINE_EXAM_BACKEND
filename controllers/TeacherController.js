@@ -130,7 +130,14 @@ const verifyOtp = async (req, res) => {
         teacher.sessions.push({ sessionId, expiresAt });
         await teacher.save();
 
-        res.status(200).json({ message: "Login successful", sessionId });
+        res.status(200).json({
+            message: "Login successful",
+            sessionId,
+            teacherId: teacher._id,
+            name: teacher.name,
+            email: teacher.email,
+            mobileNumber: teacher.mobileNumber,
+        });
     } catch (error) {
         res.status(500).json({ error: "Server error" });
     }
