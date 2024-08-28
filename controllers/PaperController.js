@@ -2,7 +2,8 @@ const Paper = require('../models/Paper');
 const Question = require('../models/Question');
 const multer = require('multer');
 const cloudinary = require('../config/cloudinary');
-const upload = multer({ limits: { fileSize: 50 * 1024 * 1024 } }); // Set limit to 50MB
+const upload = multer({ dest: 'uploads/' });
+const fs = require('fs');
 
 // Create a new paper
 exports.createPaper = async (req, res) => {
@@ -53,24 +54,27 @@ exports.createPaper = async (req, res) => {
 
 // Upload an image for a question
 exports.uploadQuestionImage = async (req, res) => {
-    try {
-      const file = req.file;
-  
-      if (!file) {
-        return res.status(400).json({ message: 'No file uploaded' });
-      }
-  
-      // Upload to Cloudinary
-      const uploadResponse = await cloudinary.uploader.upload(file.path, {
-        folder: 'question',
-      });
-  
-      res.json({ url: uploadResponse.url });
-    } catch (err) {
-      console.error(err);
-      res.status(500).send('Failed to upload image');
+  try {
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ message: 'No file uploaded' });
     }
-  };
+
+    // Upload to Cloudinary
+    const uploadResponse = await cloudinary.uploader.upload(file.path, {
+      folder: 'question',
+    });
+
+    // Delete the temporary file
+    fs.unlinkSync(file.path);
+
+    res.json({ url: uploadResponse.url });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Failed to upload image');
+  }
+};
 
 // Add a new question to a paper
 exports.addQuestion = async (req, res) => {

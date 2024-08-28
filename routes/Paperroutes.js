@@ -1,5 +1,7 @@
 const express = require('express');
 const { createPaper, uploadQuestionImage, addQuestion, getQuestionsByPaperId, getPapersByTeacherId } = require('../controllers/PaperController');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 
 const router = express.Router();
 
@@ -7,7 +9,7 @@ const router = express.Router();
 router.post('/create', createPaper);
 
 // Upload an image for a question
-router.post('/upload', uploadQuestionImage);
+router.post('/upload', upload.single('file'), uploadQuestionImage);
 
 // Add a new question to a paper
 router.post('/add-question', addQuestion);
