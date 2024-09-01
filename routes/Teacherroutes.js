@@ -1,5 +1,13 @@
 const express = require("express");
-const { login, verifyOtp, verifySession,signUp, verifyOtppasscode ,forgotPassword,resetPassword } = require("../controllers/TeacherController");
+const {
+  login,
+  verifyOtp,
+  verifySession,
+  signUp,
+  verifyOtppasscode,
+  forgotPassword,
+  resetPassword,
+} = require("../controllers/TeacherController");
 const router = express.Router();
 
 router.post("/login", login);

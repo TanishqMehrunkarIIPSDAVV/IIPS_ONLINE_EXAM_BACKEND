@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const QuestionSchema = new mongoose.Schema({
   paperId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Paper',
+    ref: "Paper",
     required: true,
   },
   questionheading: String,
@@ -17,4 +17,4 @@ const QuestionSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Question', QuestionSchema);
+module.exports = mongoose.model("Question", QuestionSchema);

@@ -5,22 +5,27 @@ const TeacherRoutes = require("./routes/Teacherroutes");
 const PaperRoutes = require("./routes/Paperroutes");
 const cors = require("cors"); // Add this line
 require("dotenv").config();
-const { removeExpiredSessions } = require('./utils/sessionCleanup');
+const { removeExpiredSessions } = require("./utils/sessionCleanup");
 
 const app = express();
 
 // Add CORS middleware
-app.use(cors({
+app.use(
+  cors({
     origin: function (origin, callback) {
-        callback(null, true); // Allow all origins
+      callback(null, true); // Allow all origins
     },
     credentials: true, // Allow cookies to be sent
-}));
-
+  })
+);
 
 app.use(express.json());
 
-mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose
+  .connect(process.env.MONGODB_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log("Connected to Database");
   })
@@ -28,20 +33,21 @@ mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true, useUnifiedTop
     console.error("Database connection failed:", error);
   });
 
-  app.use(session({
-    secret: 'your-secret-key',
+app.use(
+  session({
+    secret: "your-secret-key",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false } // secure should be true if using HTTPS
-  }));
+    cookie: { secure: false }, // secure should be true if using HTTPS
+  })
+);
 app.use("/teacher", TeacherRoutes);
-app.use("/paper",PaperRoutes);
+app.use("/paper", PaperRoutes);
 
 //cleaning session
-setInterval(removeExpiredSessions,  30 *60 * 1000);// every 30 min
+setInterval(removeExpiredSessions, 30 * 60 * 1000); // every 30 min
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-

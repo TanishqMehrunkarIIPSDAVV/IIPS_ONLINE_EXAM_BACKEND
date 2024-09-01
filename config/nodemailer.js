@@ -31,7 +31,7 @@ exports.sendResetLinkToEmail = async (email, resetLink) => {
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Password Reset Request",
-      text: `You requested a password reset. Click the link below to reset your password:\n\n${resetLink}\n\nIf you did not request this, please ignore this email.`, 
+      text: `You requested a password reset. Click the link below to reset your password:\n\n${resetLink}\n\nIf you did not request this, please ignore this email.`,
     });
     console.log("Password reset link sent successfully via email");
   } catch (error) {

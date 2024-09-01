@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const PaperSchema = new mongoose.Schema({
   className: {
@@ -49,7 +49,7 @@ const PaperSchema = new mongoose.Schema({
   },
   questionIds: {
     type: String, // Store question IDs as a comma-separated string
-    default: '',
+    default: "",
   },
   createdAt: {
     type: Date,
@@ -57,4 +57,4 @@ const PaperSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Paper', PaperSchema);
+module.exports = mongoose.model("Paper", PaperSchema);
