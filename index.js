@@ -22,10 +22,7 @@ app.use(
 app.use(express.json());
 
 mongoose
-  .connect(process.env.MONGODB_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGODB_URL)
   .then(() => {
     console.log("Connected to Database");
   })

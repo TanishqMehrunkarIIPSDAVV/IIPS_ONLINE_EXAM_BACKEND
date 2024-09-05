@@ -131,6 +131,8 @@ const verifyOtp = async (req, res) => {
       return res.status(400).json({ error: "Invalid or expired OTP" });
     }
 
+    
+
     // Clear OTP and OTP expiry after successful verification
     teacher.otp = null;
     teacher.otpExpiry = null;
