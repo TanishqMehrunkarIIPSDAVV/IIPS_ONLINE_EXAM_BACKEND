@@ -4,6 +4,10 @@ const multer = require("multer");
 const cloudinary = require("../config/cloudinary");
 const upload = multer({ dest: "uploads/" });
 const fs = require("fs");
+const {
+  ReadyPaper,
+  ReadyQuestion,
+} = require("../models/Ready_paper_&_question");
 
 // Create a new paper
 exports.createPaper = async (req, res) => {
@@ -83,6 +87,7 @@ exports.deletePaper = async (req, res) => {
       });
     }
 
+    // Find and delete the paper
     const result = await Paper.deleteOne({ _id });
 
     if (result.deletedCount === 0) {
@@ -92,11 +97,15 @@ exports.deletePaper = async (req, res) => {
       });
     }
 
+    // Delete all questions of  the paper
+    await Question.deleteMany({ paperId: _id });
+
     res.status(200).json({
       success: true,
       message: "Paper deleted successfully",
     });
   } catch (error) {
+    console.error("Error deleting paper:", error);
     res.status(500).json({
       success: false,
       message: "Server Error",
@@ -279,6 +288,7 @@ exports.addQuestion = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
 exports.getQuestionsByPaperId = async (req, res) => {
   try {
     const { paperId } = req.body; // Get paperId from the request body
@@ -302,6 +312,151 @@ exports.getPapersByTeacherId = async (req, res) => {
     const { teacherId } = req.body; // Get teacherId from the request body
 
     const papers = await Paper.find({ teacherId });
+
+    if (!papers.length) {
+      return res.status(404).json({ msg: "No papers found for this teacher" });
+    }
+
+    res.status(200).json(papers);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Server Error");
+  }
+};
+exports.getPaperdetailBypaperId = async (req, res) => {
+  try {
+    const { paperId } = req.body; // Get teacherId from the request body
+
+    const paper = await Paper.find({ _id: paperId });
+
+    if (!paper) {
+      return res.status(404).json({ msg: "No papers found for this teacher" });
+    }
+
+    res.status(200).json(paper);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Server Error");
+  }
+};
+
+exports.Create_Ready_Paper = async (req, res) => {
+  const { paperId } = req.body;
+
+  try {
+    // Fetch the paper
+    const paper = await Paper.findById(paperId);
+    if (!paper) {
+      return res.status(404).json({ message: "Paper not found" });
+    }
+
+    // Calculate the start and end times of the new paper
+    const paperStartTime = new Date(paper.date);
+    paperStartTime.setHours(parseInt(paper.time.split(":")[0]));
+    paperStartTime.setMinutes(parseInt(paper.time.split(":")[1]));
+
+    const paperEndTime = new Date(paperStartTime);
+    paperEndTime.setHours(paperEndTime.getHours() + paper.duration.hours);
+    paperEndTime.setMinutes(paperEndTime.getMinutes() + paper.duration.minutes);
+
+    // Check for overlapping papers in the ReadyPaper collection
+    const overlappingPaper = await ReadyPaper.findOne({
+      className: paper.className,
+      semester: paper.semester,
+      date: paper.date,
+      $or: [
+        {
+          $and: [
+            { time: { $lte: paper.time } }, // Existing paper starts before or at the same time
+            {
+              "duration.hours": {
+                $gt:
+                  paperStartTime.getHours() -
+                  parseInt(paper.time.split(":")[0]),
+              },
+            }, // Duration overlaps
+          ],
+        },
+        {
+          $and: [
+            { time: { $gte: paper.time } }, // Existing paper starts after the new paper
+            {
+              "duration.hours": {
+                $lte:
+                  paperEndTime.getHours() - parseInt(paper.time.split(":")[0]),
+              },
+            }, // Duration overlaps
+          ],
+        },
+      ],
+    });
+
+    if (overlappingPaper) {
+      return res.status(400).json({
+        success: false,
+        message: `A paper is already scheduled for ${paper.className} ${
+          paper.semester
+        } on ${paper.date} from ${overlappingPaper.time} to ${new Date(
+          new Date(overlappingPaper.time).getTime() +
+            overlappingPaper.duration.hours * 60 * 60 * 1000
+        ).toLocaleTimeString()} for subject ${overlappingPaper.subject}.`,
+      });
+    }
+
+    // Fetch all associated questions
+    const questions = await Question.find({ paperId: paperId });
+
+    // Create a new ReadyPaper
+    const readyPaper = new ReadyPaper({
+      className: paper.className,
+      semester: paper.semester,
+      subject: paper.subject,
+      subjectCode: paper.subjectCode,
+      date: paper.date,
+      time: paper.time,
+      duration: paper.duration,
+      marks: paper.marks,
+      testType: paper.testType,
+      teacherId: paper.teacherId,
+      questionIds: paper.questionIds,
+    });
+
+    await readyPaper.save();
+
+    // Move each question to ReadyQuestion
+    for (let question of questions) {
+      const readyQuestion = new ReadyQuestion({
+        paperId: readyPaper._id,
+        questionheading: question.questionheading,
+        questionDescription: question.questionDescription,
+        compilerReq: question.compilerReq,
+        marks: question.marks,
+        image: question.image,
+      });
+
+      await readyQuestion.save();
+    }
+
+    // Delete the original paper and questions
+    await Paper.findByIdAndDelete(paperId);
+    await Question.deleteMany({ paperId: paperId });
+
+    res.status(200).json({
+      success: true,
+      message:
+        "Paper and associated questions have been submitted successfully",
+    });
+  } catch (error) {
+    console.error("Error submitting paper:", error);
+    res.status(500).send("Server Error");
+  }
+};
+//get Ready papers by teacherId
+exports.getReadyPapersByTeacherId = async (req, res) => {
+  try {
+    const { teacherId } = req.body; // Get teacherId from the request body
+
+    const papers = await ReadyPaper.find({ teacherId });
 
     if (!papers.length) {
       return res.status(404).json({ msg: "No papers found for this teacher" });
