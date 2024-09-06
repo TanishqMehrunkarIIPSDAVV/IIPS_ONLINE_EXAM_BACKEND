@@ -4,7 +4,6 @@ const multer = require("multer");
 const cloudinary = require("../config/cloudinary");
 const upload = multer({ dest: "uploads/" });
 const fs = require("fs");
-const { default: mongoose } = require("mongoose");
 
 // Create a new paper
 exports.createPaper = async (req, res) => {
@@ -53,11 +52,12 @@ exports.createPaper = async (req, res) => {
 };
 
 //Editing the Paper
-exports.editPaper=async (req,res)=>{
-
-  try
-  {
-    let edited_paper=await Paper.findOneAndUpdate({_id:req.body._id},req.body);
+exports.editPaper = async (req, res) => {
+  try {
+    let edited_paper = await Paper.findOneAndUpdate(
+      { _id: req.body._id },
+      req.body
+    );
     await edited_paper.save();
 
     res.status(201).json({
@@ -66,15 +66,12 @@ exports.editPaper=async (req,res)=>{
       message: "Paper Edited successfully",
       paper: edited_paper,
     });
-
-  }
-  catch (error) {
+  } catch (error) {
     console.error(error.message);
     res.status(500).send("Server Error");
   }
   // console.log(req.body);
-
-}
+};
 
 exports.deletePaper = async (req, res) => {
   try {
@@ -100,7 +97,6 @@ exports.deletePaper = async (req, res) => {
       message: "Paper deleted successfully",
     });
   } catch (error) {
-    console.error(error.message);
     res.status(500).json({
       success: false,
       message: "Server Error",
@@ -109,50 +105,67 @@ exports.deletePaper = async (req, res) => {
 };
 
 // Duplicate a Paper
-exports.duplicatePaper = async (req,res) =>
-{
-
-  const keyToExclude = "_id"; 
-  const filteredData = Object.keys(req.body).filter(key => (key !== keyToExclude) && (key !== "__v"))
-  .reduce((obj, key) => {
-    obj[key] = req.body[key];
-    return obj;
-  }, {});
-
+exports.duplicatePaper = async (req, res) => {
+  const keyToExclude = "_id";
+  const filteredData = Object.keys(req.body)
+    .filter((key) => key !== keyToExclude && key !== "__v")
+    .reduce((obj, key) => {
+      obj[key] = req.body[key];
+      return obj;
+    }, {});
 
   try {
     const newPaper = new Paper(filteredData);
 
     await newPaper.save();
 
-    // Send the paper details including the _id
+    const originalQuestions = await Question.find({ paperId: req.body._id });
+
+    const newQuestionIds = [];
+    for (const originalQuestion of originalQuestions) {
+      const newQuestion = new Question({
+        paperId: newPaper._id,
+        questionheading: originalQuestion.questionheading,
+        questionDescription: originalQuestion.questionDescription,
+        compilerReq: originalQuestion.compilerReq,
+        marks: originalQuestion.marks,
+        image: originalQuestion.image,
+      });
+
+      await newQuestion.save();
+      newQuestionIds.push(newQuestion._id);
+    }
+
+    newPaper.questionIds = newQuestionIds.join(",");
+    await newPaper.save();
+
     res.status(201).json({
       success: true,
-      paperId: newPaper._id, // Include the _id in the response
-      message: "Paper created successfully",
+      paperId: newPaper._id,
+      message: "Paper duplicated successfully",
       paper: newPaper,
     });
   } catch (error) {
     console.error(error.message);
     res.status(500).send("Server Error");
   }
-}
+};
 
 // Duplicating a question
 exports.duplicateQuestion = async (req, res) => {
   const data = req.body;
   // Filter out unwanted keys (_id and __v) from the question object
   const filteredKeyData = Object.keys(data.question)
-    .filter(key => key !== "_id" && key !== "__v")
+    .filter((key) => key !== "_id" && key !== "__v")
     .reduce((obj, key) => {
-      obj[key] = data.question[key]; 
+      obj[key] = data.question[key];
       return obj;
     }, {});
 
-  console.log(filteredKeyData); 
+  console.log(filteredKeyData);
 
   try {
-    const question = new Question(filteredKeyData); 
+    const question = new Question(filteredKeyData);
 
     await question.save();
 
@@ -204,7 +217,6 @@ exports.deleteQuestion = async (req, res) => {
     });
   }
 };
-
 
 // Upload an image for a question
 exports.uploadQuestionImage = async (req, res) => {
