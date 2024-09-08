@@ -13,6 +13,7 @@ const {
   getPaperdetailBypaperId,
   Create_Ready_Paper,
   getReadyPapersByTeacherId,
+  editQuestion,
 } = require("../controllers/PaperController");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
@@ -36,6 +37,8 @@ router.post("/duplicate-paper",duplicatePaper)
 
 // Duplicating a question
 router.post("/duplicate-question",duplicateQuestion)
+
+router.post("/edit-question",editQuestion)
 
 // Upload an image for a question
 router.post("/upload", upload.single("file"), uploadQuestionImage);
