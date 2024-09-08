@@ -227,6 +227,30 @@ exports.deleteQuestion = async (req, res) => {
   }
 };
 
+//Editing a question
+exports.editQuestion = async (req, res) => {
+  const { _id , paperId , questionheading, questionDescription, compilerReq, marks,image } =
+    req.body;
+  // console.log(req.body);
+  try {
+    const result = await Question.findOneAndUpdate(
+      { _id: _id, paperId: paperId },
+      {questionheading, questionDescription, compilerReq, marks,image }
+    );
+    await result.save();
+    res.status(200).json({
+      success: true,
+      message: "Question updated successfully",
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+}
+
 // Upload an image for a question
 exports.uploadQuestionImage = async (req, res) => {
   try {
@@ -252,7 +276,7 @@ exports.uploadQuestionImage = async (req, res) => {
 };
 
 // Add a new question to a paper
-exports.addQuestion = async (req, res) => {
+exports.addQuestion = async (req, res) =>{
   const {
     paperId,
     questionheading,
