@@ -368,7 +368,7 @@ exports.Create_Ready_Paper = async (req, res) => {
   const { paperId } = req.body;
 
   try {
-    // Fetch the paper
+   
     const paper = await Paper.findById(paperId);
     if (!paper) {
       return res.status(404).json({ message: "Paper not found" });
@@ -392,7 +392,7 @@ exports.Create_Ready_Paper = async (req, res) => {
       date: paper.date,
       $or: [
         {
-          // Case 1: The new paper overlaps with an existing one
+          // Case : The new paper overlaps with an existing one
           startTime: { $lt: paperEndTime }, // New paper starts before the end of an existing paper
           endTime: { $gt: paperStartTime } // New paper ends after the start of an existing paper
         }
@@ -412,7 +412,7 @@ exports.Create_Ready_Paper = async (req, res) => {
     // Fetch all associated questions
     const questions = await Question.find({ paperId: paperId });
 
-    // Create a new ReadyPaper
+   
     const readyPaper = new ReadyPaper({
       className: paper.className,
       semester: paper.semester,
