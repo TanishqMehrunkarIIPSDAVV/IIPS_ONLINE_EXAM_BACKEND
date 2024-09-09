@@ -231,7 +231,7 @@ exports.deleteQuestion = async (req, res) => {
 exports.editQuestion = async (req, res) => {
   const { _id , paperId , questionheading, questionDescription, compilerReq, marks,image } =
     req.body;
-  // console.log(req.body);
+
   try {
     const result = await Question.findOneAndUpdate(
       { _id: _id, paperId: paperId },
@@ -475,6 +475,73 @@ exports.Create_Ready_Paper = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+exports.deleteReadyPaper =async (req,res)=>{
+  
+  try
+  {
+    // console.log(req.body.paper._id);
+    const paperId=req.body.paper._id;
+
+    const readyPaper= await ReadyPaper.findById(paperId);
+    if(!readyPaper){
+      return res.status(404).json({msg:"Paper not found"});
+    }
+    await ReadyPaper.findByIdAndDelete(paperId);
+
+    await ReadyQuestion.deleteMany({ paperId: paperId });
+
+    res.status(200).json({msg:"Paper deleted successfully"});
+  }
+  catch(error){
+    console.error("Error deleting paper:", error);
+    res.status(500).send("Server Error");
+  }
+}
+
+
+exports.moveToDashBoard = async (req, res) => {
+  try {
+      //Adding in Dash board
+
+      const paperId=req.body._id;
+      // console.log(req.body);
+      const newPaper = new Paper(req.body);
+      await newPaper.save();
+      const question_id_list=await ReadyQuestion.find({"paperId":paperId});
+      for(let question of question_id_list)
+      {
+        const {paperId,questionheading,questionDescription,compilerReq,marks,image}=question;
+        const newQuestion = new Question({
+          paperId,
+          questionheading,
+          questionDescription,
+          compilerReq,
+          marks,
+          image
+        });
+        await newQuestion.save();
+      }
+
+      // Deleting Paper from ReadyPaper
+
+      const readyPaper= await ReadyPaper.findById(paperId);
+      if(!readyPaper){
+        return res.status(404).json({msg:"Paper not found"});
+      }
+      await ReadyPaper.findByIdAndDelete(paperId);
+  
+      await ReadyQuestion.deleteMany({ paperId: paperId });
+  
+      res.status(200).json({msg:"Paper Moved to Dashboard successfully"});
+  }
+  catch(error)
+  {
+    console.log("The Error:",error);
+    res.status(500).send("Error in moving paper to Dashboard");
+  }
+}
+
 //get Ready papers by teacherId
 exports.getReadyPapersByTeacherId = async (req, res) => {
   try {
