@@ -15,6 +15,11 @@ const ReadyPaperSchema = new mongoose.Schema({
   testType: String,
   teacherId: String,
   questionIds: String, // Store question IDs as a comma-separated string
+
+  // Add these fields to handle the full start and end time of the paper
+  startTime: Date, // The full start time as a Date object
+  endTime: Date,   // The full end time as a Date object
+  
   createdAt: {
     type: Date,
     default: Date.now,

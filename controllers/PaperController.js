@@ -368,17 +368,19 @@ exports.Create_Ready_Paper = async (req, res) => {
   const { paperId } = req.body;
 
   try {
-    // Fetch the paper
+   
     const paper = await Paper.findById(paperId);
     if (!paper) {
       return res.status(404).json({ message: "Paper not found" });
     }
 
-    // Calculate the start and end times of the new paper
+    // Calculate start and end times of the new paper
     const paperStartTime = new Date(paper.date);
-    paperStartTime.setHours(parseInt(paper.time.split(":")[0]));
-    paperStartTime.setMinutes(parseInt(paper.time.split(":")[1]));
+    const [hours, minutes] = paper.time.split(":").map(Number);
+    paperStartTime.setHours(hours);
+    paperStartTime.setMinutes(minutes);
 
+    // Calculate the paper's end time based on the duration
     const paperEndTime = new Date(paperStartTime);
     paperEndTime.setHours(paperEndTime.getHours() + paper.duration.hours);
     paperEndTime.setMinutes(paperEndTime.getMinutes() + paper.duration.minutes);
@@ -390,47 +392,27 @@ exports.Create_Ready_Paper = async (req, res) => {
       date: paper.date,
       $or: [
         {
-          $and: [
-            { time: { $lte: paper.time } }, // Existing paper starts before or at the same time
-            {
-              "duration.hours": {
-                $gt:
-                  paperStartTime.getHours() -
-                  parseInt(paper.time.split(":")[0]),
-              },
-            }, // Duration overlaps
-          ],
-        },
-        {
-          $and: [
-            { time: { $gte: paper.time } }, // Existing paper starts after the new paper
-            {
-              "duration.hours": {
-                $lte:
-                  paperEndTime.getHours() - parseInt(paper.time.split(":")[0]),
-              },
-            }, // Duration overlaps
-          ],
-        },
-      ],
+          // Case : The new paper overlaps with an existing one
+          startTime: { $lt: paperEndTime }, // New paper starts before the end of an existing paper
+          endTime: { $gt: paperStartTime } // New paper ends after the start of an existing paper
+        }
+      ]
     });
 
     if (overlappingPaper) {
+      const overlappingPaperStartTime = new Date(overlappingPaper.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+      const overlappingPaperEndTime = new Date(overlappingPaper.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
       return res.status(400).json({
         success: false,
-        message: `A paper is already scheduled for ${paper.className} ${
-          paper.semester
-        } on ${paper.date} from ${overlappingPaper.time} to ${new Date(
-          new Date(overlappingPaper.time).getTime() +
-            overlappingPaper.duration.hours * 60 * 60 * 1000
-        ).toLocaleTimeString()} for subject ${overlappingPaper.subject}.`,
+        message: `A paper is already scheduled for ${paper.className} ${paper.semester} on ${new Date(overlappingPaper.date).toDateString()} from ${overlappingPaperStartTime} to ${overlappingPaperEndTime} for subject ${overlappingPaper.subject}.`,
       });
     }
 
     // Fetch all associated questions
     const questions = await Question.find({ paperId: paperId });
 
-    // Create a new ReadyPaper
+   
     const readyPaper = new ReadyPaper({
       className: paper.className,
       semester: paper.semester,
@@ -443,6 +425,8 @@ exports.Create_Ready_Paper = async (req, res) => {
       testType: paper.testType,
       teacherId: paper.teacherId,
       questionIds: paper.questionIds,
+      startTime: paperStartTime,
+      endTime: paperEndTime
     });
 
     await readyPaper.save();
@@ -455,7 +439,7 @@ exports.Create_Ready_Paper = async (req, res) => {
         questionDescription: question.questionDescription,
         compilerReq: question.compilerReq,
         marks: question.marks,
-        image: question.image,
+        image: question.image
       });
 
       await readyQuestion.save();
@@ -467,8 +451,7 @@ exports.Create_Ready_Paper = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message:
-        "Paper and associated questions have been submitted successfully",
+      message: "Paper and associated questions have been submitted successfully",
     });
   } catch (error) {
     console.error("Error submitting paper:", error);
