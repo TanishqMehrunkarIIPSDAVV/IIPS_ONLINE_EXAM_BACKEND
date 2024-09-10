@@ -18,12 +18,12 @@ function parseTimeTo24Hour(timeString) {
 }
 
 exports.studentlogin = async (req, res) => {
-  const { name, password, rollno, enrollno, subcode, subname, className, semester, paperId } = req.body;
+  const { name, password, rollno, enrollno, subcode, subname, className, semester } = req.body;
 
   try {
     // 1. Validate student details in the student database
     const student = await Student.findOne({
-      className: className.toUpperCase(), // Ensuring case consistency
+      className: className, // Ensuring case consistency
       semester: `${semester}th_sem`,
       fullName: name,
       rollNumber: rollno,
@@ -37,7 +37,6 @@ exports.studentlogin = async (req, res) => {
 
     // 2. Find paper by paperId, className, and semester
     const paper = await ReadyPaper.findOne({
-      _id: paperId, // Search by paperId
       className: className,
       semester: `${semester}th Sem`,
       subjectCode: subcode,
