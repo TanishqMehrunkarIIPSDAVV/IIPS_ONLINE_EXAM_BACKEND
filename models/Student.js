@@ -1,6 +1,15 @@
 const mongoose = require("mongoose");
 
-const StudentDetailsSchema = new mongoose.Schema({
+const StudentSchema = new mongoose.Schema({
+  className: {
+    type: String,
+    required: true,
+    enum: ['MTECH', 'MCA'], // You can add more classes if needed
+  },
+  semester: {
+    type: String,
+    required: true,
+  },
   email: {
     type: String,
     required: true,
@@ -27,30 +36,6 @@ const StudentDetailsSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-  },
-});
-
-const SemesterSchema = new mongoose.Schema({
-  semester: {
-    type: String,
-    required: true,
-  },
-  students: [StudentDetailsSchema],
-});
-
-const ClassSchema = new mongoose.Schema({
-  MTECH: [SemesterSchema],
-  MCA: [SemesterSchema],
-});
-
-const StudentSchema = new mongoose.Schema({
-  MTECH: {
-    type: ClassSchema,
-    required: false,
-  },
-  MCA: {
-    type: ClassSchema,
-    required: false,
   },
 });
 

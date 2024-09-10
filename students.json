@@ -1,120 +1,132 @@
-{
-  "Student": {
-    "MTECH": {
-      "7th_sem": [
-        {
-          "email": "nykay10968@gmail.com",
-          "fullName": "Kartikey Yadav",
-          "rollNumber": "IT-2K21-25",
-          "enrollmentNumber": "DE2102175",
-          "phoneNumber": "7999996876",
-          "password": "kart6876"
-        },
-        {
-          "email": "nishantkaushal0708@gmail.com",
-          "fullName": "Nishant Kaushal",
-          "rollNumber": "IT-2k21-35",
-          "enrollmentNumber": "De2102036",
-          "phoneNumber": "9302836725",
-          "password": "nish6725"
-        },
-        {
-          "email": "rachita17dashore@gmail.com",
-          "fullName": "Rachita Dashore",
-          "rollNumber": "IT2K2147",
-          "enrollmentNumber": "DE2102192",
-          "phoneNumber": "9329494641",
-          "password": "rach4641"
-        },
-        {
-          "email": "v.samarth1212@gmail.com",
-          "fullName": "Samarth Vaidya",
-          "rollNumber": "IT-2K21-54",
-          "enrollmentNumber": "DE2102194",
-          "phoneNumber": "7987832613",
-          "password": "sama2613"
-        },
-        {
-          "email": "ishikaverma174@gmail.com",
-          "fullName": "Ishika Verma",
-          "rollNumber": "IT2k21-22",
-          "enrollmentNumber": "De2102090",
-          "phoneNumber": "9826887355",
-          "password": "ishi7355"
-        }
-      ],
-      "5th_sem": [
-        {
-          "email": "payalmeena069@gmail.com",
-          "fullName": "Payal Meena",
-          "rollNumber": "IT-2K22-31",
-          "enrollmentNumber": "DE2202203",
-          "phoneNumber": "8871379927",
-          "password": "paya9927"
-        },
-        {
-          "email": "sahillutare@gmail.com",
-          "fullName": "Sahil Lutare",
-          "rollNumber": "IT2K22-47",
-          "enrollmentNumber": "DE2202204",
-          "phoneNumber": "7470679927",
-          "password": "sahi9927"
-        },
-        {
-          "email": "mehul.vv19@gmail.com",
-          "fullName": "Mehul Vijayvargiya",
-          "rollNumber": "IT-2k22-25",
-          "enrollmentNumber": "DE2202183",
-          "phoneNumber": "9179962222",
-          "password": "mehu2222"
-        },
-        {
-          "email": "prachi.mukati2204@gmail.com",
-          "fullName": "Prachi Mukati",
-          "rollNumber": "IT-2k22-34",
-          "enrollmentNumber": "DE2202033",
-          "phoneNumber": "8839498483",
-          "password": "prac8483"
-        }
-      ],
-      "3rd_sem": [
-        {
-          "email": "harshbalwally907@gmail.com",
-          "fullName": "Harsh Balwally",
-          "rollNumber": "ic-2k23-33",
-          "enrollmentNumber": "dx21044575",
-          "phoneNumber": "334567009",
-          "password": "hars7009"
-        }
-      ]
-    },
-    "MCA": {
-      "7th_sem": [
-        {
-          "email": "snehalikhar784@gmail.com",
-          "fullName": "Sneha Likhar",
-          "rollNumber": "IC-2K21-83",
-          "enrollmentNumber": "DX2100316",
-          "phoneNumber": "9977780748",
-          "password": "sneh0748"
-        },
-        {
-          "email": "lavanyahardas7@gmail.com",
-          "fullName": "Lavanya Hardas",
-          "rollNumber": "IC-2K21-43",
-          "enrollmentNumber": "DX2101159",
-          "phoneNumber": "9926133698",
-          "password": "lava3698"
-        },
-        {
-          "email": "kratikmandloi03@gmail.com",
-          "fullName": "Kratik Mandloi",
-          "rollNumber": "Ic-2k21-39",
-          "enrollmentNumber": "Dx2100091",
-          "phoneNumber": "7587534404",
-          "password": "krat4404"
-        }
-      ]
-    }
+[
+  {
+    "className": "MTECH",
+    "semester": "7th_sem",
+    "email": "nykay10968@gmail.com",
+    "fullName": "Kartikey Yadav",
+    "rollNumber": "IT-2K21-25",
+    "enrollmentNumber": "DE2102175",
+    "phoneNumber": "7999996876",
+    "password": "kart6876"
+  },
+  {
+    "className": "MTECH",
+    "semester": "7th_sem",
+    "email": "nishantkaushal0708@gmail.com",
+    "fullName": "Nishant Kaushal",
+    "rollNumber": "IT-2k21-35",
+    "enrollmentNumber": "De2102036",
+    "phoneNumber": "9302836725",
+    "password": "nish6725"
+  },
+  {
+    "className": "MTECH",
+    "semester": "7th_sem",
+    "email": "rachita17dashore@gmail.com",
+    "fullName": "Rachita Dashore",
+    "rollNumber": "IT2K2147",
+    "enrollmentNumber": "DE2102192",
+    "phoneNumber": "9329494641",
+    "password": "rach4641"
+  },
+  {
+    "className": "MTECH",
+    "semester": "7th_sem",
+    "email": "v.samarth1212@gmail.com",
+    "fullName": "Samarth Vaidya",
+    "rollNumber": "IT-2K21-54",
+    "enrollmentNumber": "DE2102194",
+    "phoneNumber": "7987832613",
+    "password": "sama2613"
+  },
+  {
+    "className": "MTECH",
+    "semester": "7th_sem",
+    "email": "ishikaverma174@gmail.com",
+    "fullName": "Ishika Verma",
+    "rollNumber": "IT2k21-22",
+    "enrollmentNumber": "De2102090",
+    "phoneNumber": "9826887355",
+    "password": "ishi7355"
+  },
+  {
+    "className": "MTECH",
+    "semester": "5th_sem",
+    "email": "payalmeena069@gmail.com",
+    "fullName": "Payal Meena",
+    "rollNumber": "IT-2K22-31",
+    "enrollmentNumber": "DE2202203",
+    "phoneNumber": "8871379927",
+    "password": "paya9927"
+  },
+  {
+    "className": "MTECH",
+    "semester": "5th_sem",
+    "email": "sahillutare@gmail.com",
+    "fullName": "Sahil Lutare",
+    "rollNumber": "IT2K22-47",
+    "enrollmentNumber": "DE2202204",
+    "phoneNumber": "7470679927",
+    "password": "sahi9927"
+  },
+  {
+    "className": "MTECH",
+    "semester": "5th_sem",
+    "email": "mehul.vv19@gmail.com",
+    "fullName": "Mehul Vijayvargiya",
+    "rollNumber": "IT-2k22-25",
+    "enrollmentNumber": "DE2202183",
+    "phoneNumber": "9179962222",
+    "password": "mehu2222"
+  },
+  {
+    "className": "MTECH",
+    "semester": "5th_sem",
+    "email": "prachi.mukati2204@gmail.com",
+    "fullName": "Prachi Mukati",
+    "rollNumber": "IT-2k22-34",
+    "enrollmentNumber": "DE2202033",
+    "phoneNumber": "8839498483",
+    "password": "prac8483"
+  },
+  {
+    "className": "MTECH",
+    "semester": "3th_sem",
+    "email": "harshbalwally907@gmail.com",
+    "fullName": "Harsh Balwally",
+    "rollNumber": "ic-2k23-33",
+    "enrollmentNumber": "dx21044575",
+    "phoneNumber": "334567009",
+    "password": "hars7009"
+  },
+  {
+    "className": "MCA",
+    "semester": "7th_sem",
+    "email": "snehalikhar784@gmail.com",
+    "fullName": "Sneha Likhar",
+    "rollNumber": "IC-2K21-83",
+    "enrollmentNumber": "DX2100316",
+    "phoneNumber": "9977780748",
+    "password": "sneh0748"
+  },
+  {
+    "className": "MCA",
+    "semester": "7th_sem",
+    "email": "lavanyahardas7@gmail.com",
+    "fullName": "Lavanya Hardas",
+    "rollNumber": "IC-2K21-43",
+    "enrollmentNumber": "DX2101159",
+    "phoneNumber": "9926133698",
+    "password": "lava3698"
+  },
+  {
+    "className": "MCA",
+    "semester": "7th_sem",
+    "email": "kratikmandloi03@gmail.com",
+    "fullName": "Kratik Mandloi",
+    "rollNumber": "Ic-2k21-39",
+    "enrollmentNumber": "Dx2100091",
+    "phoneNumber": "7587534404",
+    "password": "krat4404"
   }
-}
+]
