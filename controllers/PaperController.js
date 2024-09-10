@@ -542,3 +542,40 @@ exports.getReadyPapersByTeacherId = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+exports.getReadyQuestionPapersByTeacherId = async(req,res) =>
+{ 
+  try {
+    const { paperId } = req.body; // Get paperId from the request body
+
+    const questions = await ReadyQuestion.find({ paperId });
+
+    if (!questions.length) {
+      return res.status(404).json({ msg: "No questions found for this paper" });
+    }
+
+    res.status(200).json(questions);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Server Error");
+  }
+}
+
+exports.getReadyPaperDetailsByPaperId = async(req,res)=>
+{
+  try
+  {
+      const {paperId} = req.body;
+
+      const paper = await ReadyPaper.find({ _id: paperId });
+
+    if (!paper) {
+      return res.status(404).json({ msg: "No papers found for this teacher" });
+    }
+
+    res.status(200).json(paper);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Server Error");
+  }
+}
