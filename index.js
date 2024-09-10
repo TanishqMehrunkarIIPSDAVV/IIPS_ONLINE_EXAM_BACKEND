@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const TeacherRoutes = require("./routes/Teacherroutes");
 const PaperRoutes = require("./routes/Paperroutes");
+const StudentRoutes = require("./routes/Studentroutes");
 const cors = require("cors"); // Add this line
 require("dotenv").config();
 const { removeExpiredSessions } = require("./utils/sessionCleanup");
@@ -40,7 +41,7 @@ app.use(
 );
 app.use("/teacher", TeacherRoutes);
 app.use("/paper", PaperRoutes);
-
+app.use("/student",StudentRoutes);
 //cleaning session
 setInterval(removeExpiredSessions, 30 * 60 * 1000); // every 30 min
 

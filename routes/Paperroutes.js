@@ -15,6 +15,8 @@ const {
   Create_Ready_Paper,
   getReadyPapersByTeacherId,
   editQuestion,
+  deleteReadyPaper,
+  moveToDashBoard
   getReadyQuestionPapersByTeacherId,
 } = require("../controllers/PaperController");
 const multer = require("multer");
@@ -56,6 +58,12 @@ router.post("/getPapersByTeacherId", getPapersByTeacherId);
 
 // Get paper details by paper ID (from the request body)
 router.post("/getPapersdetails", getPaperdetailBypaperId);
+
+router.post("/delete-ready-paper",deleteReadyPaper)
+
+// move ready paper to dashboard
+router.post("/move-to-dashboard", moveToDashBoard);
+
 // Get ready paper details by paper ID
 router.post("/getReadyPaperDetailsByPaperId",getReadyPaperDetailsByPaperId);
 // move paper from dashboard to ready state
