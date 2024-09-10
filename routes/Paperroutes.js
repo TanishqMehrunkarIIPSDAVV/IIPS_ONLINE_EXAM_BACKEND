@@ -16,7 +16,7 @@ const {
   getReadyPapersByTeacherId,
   editQuestion,
   deleteReadyPaper,
-  moveToDashBoard
+  moveToDashBoard,
   getReadyQuestionPapersByTeacherId,
 } = require("../controllers/PaperController");
 const multer = require("multer");
