@@ -36,7 +36,7 @@ app.use(
     secret: "your-secret-key",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }, // secure should be true if using HTTPS
+    cookie: { secure: false }, 
   })
 );
 app.use("/teacher", TeacherRoutes);
