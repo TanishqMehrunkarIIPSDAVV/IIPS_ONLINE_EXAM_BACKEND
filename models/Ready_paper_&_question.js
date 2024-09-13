@@ -37,6 +37,14 @@ const ReadyQuestionSchema = new mongoose.Schema({
   compilerReq: String,
   marks: Number,
   image: String,
+  previousQuestionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ReadyQuestion",
+  },
+  nextQuestionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ReadyQuestion",
+  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -368,7 +368,6 @@ exports.Create_Ready_Paper = async (req, res) => {
   const { paperId } = req.body;
 
   try {
-   
     const paper = await Paper.findById(paperId);
     if (!paper) {
       return res.status(404).json({ message: "Paper not found" });
@@ -380,21 +379,19 @@ exports.Create_Ready_Paper = async (req, res) => {
     paperStartTime.setHours(hours);
     paperStartTime.setMinutes(minutes);
 
-    // Calculate the paper's end time based on the duration
     const paperEndTime = new Date(paperStartTime);
     paperEndTime.setHours(paperEndTime.getHours() + paper.duration.hours);
     paperEndTime.setMinutes(paperEndTime.getMinutes() + paper.duration.minutes);
 
-    // Check for overlapping papers in the ReadyPaper collection
+    // Check for overlapping papers
     const overlappingPaper = await ReadyPaper.findOne({
       className: paper.className,
       semester: paper.semester,
       date: paper.date,
       $or: [
         {
-          // Case : The new paper overlaps with an existing one
-          startTime: { $lt: paperEndTime }, // New paper starts before the end of an existing paper
-          endTime: { $gt: paperStartTime } // New paper ends after the start of an existing paper
+          startTime: { $lt: paperEndTime },
+          endTime: { $gt: paperStartTime }
         }
       ]
     });
@@ -409,10 +406,9 @@ exports.Create_Ready_Paper = async (req, res) => {
       });
     }
 
-    // Fetch all associated questions
-    const questions = await Question.find({ paperId: paperId });
+    // Fetch and sort questions by marks
+    let questions = await Question.find({ paperId: paperId }).sort({ marks: 1 });
 
-   
     const readyPaper = new ReadyPaper({
       className: paper.className,
       semester: paper.semester,
@@ -431,18 +427,30 @@ exports.Create_Ready_Paper = async (req, res) => {
 
     await readyPaper.save();
 
-    // Move each question to ReadyQuestion
-    for (let question of questions) {
+    // Link questions in order
+    let previousQuestionId = null;
+    
+    for (let i = 0; i < questions.length; i++) {
+      const question = questions[i];
       const readyQuestion = new ReadyQuestion({
         paperId: readyPaper._id,
         questionheading: question.questionheading,
         questionDescription: question.questionDescription,
         compilerReq: question.compilerReq,
         marks: question.marks,
-        image: question.image
+        image: question.image,
+        previousQuestionId: previousQuestionId,
+        nextQuestionId: null,
       });
 
-      await readyQuestion.save();
+      const savedQuestion = await readyQuestion.save();
+
+      // Update the previous question to link to the current one
+      if (previousQuestionId) {
+        await ReadyQuestion.findByIdAndUpdate(previousQuestionId, { nextQuestionId: savedQuestion._id });
+      }
+
+      previousQuestionId = savedQuestion._id;
     }
 
     // Delete the original paper and questions
@@ -458,6 +466,7 @@ exports.Create_Ready_Paper = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
 
 exports.deleteReadyPaper =async (req,res)=>{
   
