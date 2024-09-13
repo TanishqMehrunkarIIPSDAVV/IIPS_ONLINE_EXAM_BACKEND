@@ -543,6 +543,27 @@ exports.getReadyPapersByTeacherId = async (req, res) => {
   }
 };
 
+exports.editReadyQuestion=async (req,res)=>{
+  const { _id , paperId , questionheading, questionDescription, compilerReq, marks,image } =
+    req.body;
+  try {
+    const result = await ReadyQuestion.findOneAndUpdate(
+      { _id: _id, paperId: paperId },
+      {questionheading, questionDescription, compilerReq, marks,image }
+    );
+    await result.save();
+    res.status(200).json({
+      success: true,
+      message: "Question updated successfully",
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+}
 exports.getReadyQuestionPapersByTeacherId = async(req,res) =>
 { 
   try {
