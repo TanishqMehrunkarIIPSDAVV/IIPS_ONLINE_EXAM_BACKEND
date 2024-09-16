@@ -65,7 +65,6 @@ exports.getQuestionById = async (req, res) => {
     }
   };
   
-  
 
 // Get Previous or Next Question Id
 exports.getQuestionNavigation = async (req, res) => {
@@ -107,3 +106,19 @@ exports.getQuestionNavigation = async (req, res) => {
 
 
 
+  exports.getQuestionByPaperId =async (req, res) => {
+    try {
+      const { paperId } = req.body;
+  
+      const questions = await ReadyQuestion.find({ paperId });
+  
+      if (!questions.length) {
+        return res.status(404).json({ message: "No questions found for this paper!" });
+      }
+  
+      res.status(200).json({ questions, message: "Found Questions" });
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+      res.status(500).send("Server Error");
+    }
+  };
