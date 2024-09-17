@@ -6,6 +6,7 @@ const { getStudentDetailsByStudentId,
         getFirstQuestionByPaperId,
         getQuestionByPaperId 
     } = require("../controllers/StudentController2");
+const { compileAndRunCode } = require("../controllers/Compiler");
 
 
 const router = express.Router();
@@ -16,6 +17,7 @@ router.post("/getFirstQuestionByPaperId",getFirstQuestionByPaperId);
 router.post("/getQuestionById",getQuestionById);
 router.post("/getQuestionNavigation",getQuestionNavigation);
 router.post("/getQuestionByPaperId",getQuestionByPaperId);
+router.post("/compile",compileAndRunCode);
 
 module.exports = router;
 
