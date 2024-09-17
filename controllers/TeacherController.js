@@ -88,7 +88,7 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const teacher = await Teacher.findOne({ email });
+    const teacher = await Teacher.findOne({ email }); 
 
     if (!teacher) {
       return res.status(404).json({ error: "Teacher not found" });

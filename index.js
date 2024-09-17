@@ -6,7 +6,7 @@ const PaperRoutes = require("./routes/Paperroutes");
 const StudentRoutes = require("./routes/Studentroutes");
 const cors = require("cors"); // Add this line
 require("dotenv").config();
-const { removeExpiredSessions } = require("./utils/sessionCleanup");
+const { removeExpiredSessions,createCompletePaper } = require("./utils/sessionCleanup");
 
 const app = express();
 
@@ -44,6 +44,9 @@ app.use("/paper", PaperRoutes);
 app.use("/student",StudentRoutes);
 //cleaning session
 setInterval(removeExpiredSessions, 30 * 60 * 1000); // every 30 min
+//create complete paper
+// setInterval(createCompletePaper, 10000000);
+// createCompletePaper();
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {

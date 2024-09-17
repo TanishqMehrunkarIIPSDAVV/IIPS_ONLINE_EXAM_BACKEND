@@ -1,0 +1,59 @@
+const mongoose = require("mongoose");
+
+const CompletedPaperSchema = new mongoose.Schema({
+  className: String,
+  semester: String,
+  subject: String,
+  subjectCode: String,
+  date: Date,
+  time: String,
+  duration: {
+    hours: Number,
+    minutes: Number,
+  },
+  marks: Number,
+  testType: String,
+  teacherId: String,
+  questionIds: String, // Store question IDs as a comma-separated string
+
+  // Add these fields to handle the full start and end time of the paper
+  startTime: Date, // The full start time as a Date object
+  endTime: Date, // The full end time as a Date object
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const CompletedQuestionSchema = new mongoose.Schema({
+  paperId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ReadyPaper",
+    required: true,
+  },
+  questionheading: String,
+  questionDescription: String,
+  compilerReq: String,
+  marks: Number,
+  image: String,
+  previousQuestionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ReadyQuestion",
+  },
+  nextQuestionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ReadyQuestion",
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const CompletedPaper = mongoose.model("CompletedPaper", CompletedPaperSchema);
+const CompletedQuestion = mongoose.model(
+  "CompletedQuestion",
+  CompletedQuestionSchema
+);
+module.exports = { CompletedPaper, CompletedQuestion };
