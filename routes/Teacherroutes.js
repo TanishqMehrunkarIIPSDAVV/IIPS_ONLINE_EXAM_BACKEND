@@ -7,7 +7,6 @@ const {
   verifyOtppasscode,
   forgotPassword,
   resetPassword,
-  changePassword,
 } = require("../controllers/TeacherController");
 const router = express.Router();
 
@@ -18,6 +17,5 @@ router.post("/verifypasscode", verifyOtppasscode);
 router.post("/verify-session", verifySession);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
-router.post("/change-password",changePassword);
 
 module.exports = router;
