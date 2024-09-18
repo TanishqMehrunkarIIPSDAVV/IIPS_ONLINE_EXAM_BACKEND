@@ -18,7 +18,7 @@ const {
   deleteReadyPaper,
   moveToDashBoard,
   getReadyQuestionPapersByTeacherId,
-  editReadyQuestion,
+  editReadyQuestion
 } = require("../controllers/PaperController");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
