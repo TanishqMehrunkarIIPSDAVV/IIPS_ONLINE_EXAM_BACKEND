@@ -88,7 +88,7 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const teacher = await Teacher.findOne({ email });
+    const teacher = await Teacher.findOne({ email }); 
 
     if (!teacher) {
       return res.status(404).json({ error: "Teacher not found" });
@@ -252,6 +252,27 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const changePassword= async (req,res)=>
+{
+    const {teacherId,newPassword} = req.body;
+    try
+    {
+        const teacher = await Teacher.findOne(
+        {
+            _id: teacherId
+        });
+        if(!teacher) return res.status(404).json({error: "Teacher not found!!!"});
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        teacher.password = hashedPassword;
+        await teacher.save();
+        res.status(200).json({message: "Password changed successfully!!!"});
+    }
+    catch(error)
+    {
+        res.status(500).json({error: "Server error!!!"});
+    }
+}
+
 module.exports = {
   login,
   verifyOtp,
@@ -260,4 +281,5 @@ module.exports = {
   verifyOtppasscode,
   forgotPassword,
   resetPassword,
+  changePassword,
 };
