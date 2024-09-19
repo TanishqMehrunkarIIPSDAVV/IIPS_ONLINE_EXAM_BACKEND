@@ -252,6 +252,29 @@ const resetPassword = async (req, res) => {
   }
 };
 
+
+const updateTeacherDetailsById = async (req, res) => {
+  const { _id, name, email, mobile, password } = req.body;
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  try {
+    const teacher = await Teacher.findOneAndUpdate(
+      { _id: _id },
+      { name, email, mobile, password:hashedPassword }, 
+      { new: true } 
+    );
+
+    if (!teacher) {
+      return res.status(404).json({ error: "Teacher not found" });
+    }
+
+    res.status(200).json({ message: "Teacher updated successfully", teacher });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+
 module.exports = {
   login,
   verifyOtp,
@@ -260,4 +283,5 @@ module.exports = {
   verifyOtppasscode,
   forgotPassword,
   resetPassword,
+  updateTeacherDetailsById
 };
