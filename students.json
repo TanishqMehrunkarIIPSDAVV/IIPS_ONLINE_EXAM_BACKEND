@@ -128,5 +128,35 @@
     "enrollmentNumber": "DX2100091",
     "phoneNumber": "7587534404",
     "password": "KRAT4404"
-  }
+  },
+    {
+      "className": "MTECH",
+      "semester": "7TH",
+      "email": "MEHRUNKART@GMAIL.COM",
+      "fullName": "TANISHQ MEHRUNKAR",
+      "rollNumber": "IT-2K21-63",
+      "enrollmentNumber": "DE2102113",
+      "phoneNumber": "7024888951",
+      "password": "TANI8951"
+    },
+    {
+      "className": "MTECH",
+      "semester": "7TH",
+      "email": "ZK.KHAN2003@GMAIL.COM",
+      "fullName": "MOHD ZAKIE KHAN",
+      "rollNumber": "IT-2K21-31",
+      "enrollmentNumber": "DE210209",
+      "phoneNumber": "8109108797",
+      "password": "MOHD8797"
+    },
+    {
+      "className": "MTECH",
+      "semester": "7TH",
+      "email": "AKANKSHAPAL1055@GMAIL.COM",
+      "fullName": "AKANKSHA PAL",
+      "rollNumber": "IT-2K21-05",
+      "enrollmentNumber": "DE2102161",
+      "phoneNumber": "8839613324",
+      "password": "AKAN3324"
+    }
 ]
