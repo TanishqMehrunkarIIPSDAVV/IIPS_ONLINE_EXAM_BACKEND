@@ -609,3 +609,20 @@ exports.getReadyPaperDetailsByPaperId = async(req,res)=>
     res.status(500).send("Server Error");
   }
 }
+
+exports.getQuestionsDetailsByQuestionId= async(req,res)=>
+{
+    try
+    {
+        const {questionId} = req.body;
+        const question = await Question.findOne({_id : questionId});
+
+        if(!question) return res.status(404).json({msg: "No question found for this question id!!!"});
+        res.status(200).json({question});
+    }
+    catch(error)
+    {
+        console.error(error.message);
+        res.status(500).send("Server Error");
+    }
+}
