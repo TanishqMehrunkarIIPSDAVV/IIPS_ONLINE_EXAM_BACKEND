@@ -18,7 +18,8 @@ const {
   deleteReadyPaper,
   moveToDashBoard,
   getReadyQuestionPapersByTeacherId,
-  editReadyQuestion
+  editReadyQuestion,
+  getQuestionsDetailsByQuestionId,
 } = require("../controllers/PaperController");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
@@ -76,5 +77,8 @@ router.post("/getReadyQuestionPapersByTeacherId",getReadyQuestionPapersByTeacher
 
 // Edit Ready Question
 router.post("/edit-ready-question",editReadyQuestion);
+
+//Question details by question id
+router.post("/getQuestionsDetailsByQuestionId",getQuestionsDetailsByQuestionId);
 
 module.exports = router;
