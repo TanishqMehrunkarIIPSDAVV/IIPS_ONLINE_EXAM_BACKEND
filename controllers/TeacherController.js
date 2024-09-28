@@ -254,14 +254,20 @@ const resetPassword = async (req, res) => {
 
 
 const updateTeacherDetailsById = async (req, res) => {
-  const { _id, name, email, mobile, password } = req.body;
+  const { _id, name, mobile, password } = req.body;
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  let updateFields = { name, mobile }; // Start with name and mobile
+
+  // Hash the password only if it's provided
+  if (password) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    updateFields.password = hashedPassword;
+  }
+
   try {
     const teacher = await Teacher.findOneAndUpdate(
       { _id: _id },
-      { name, email, mobile, password:hashedPassword }, 
-      { new: true } 
+      updateFields, // Only the fields that need to be updated
     );
 
     if (!teacher) {
@@ -273,6 +279,7 @@ const updateTeacherDetailsById = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
 const getTeacherDetailsById = async (req, res) => {
   const { teacherId } = req.body;  // Assuming teacherId is sent in the request body
 
