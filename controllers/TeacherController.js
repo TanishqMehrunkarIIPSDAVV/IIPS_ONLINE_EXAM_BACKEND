@@ -273,6 +273,26 @@ const updateTeacherDetailsById = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+const getTeacherDetailsById = async (req, res) => {
+  const { teacherId } = req.body;  // Assuming teacherId is sent in the request body
+
+  try {
+    const teacher = await Teacher.findById(teacherId);
+
+    if (!teacher) {
+      return res.status(404).json({ error: "Teacher not found" });
+    }
+
+    const { name, mobile, password } = teacher;
+
+    res.status(200).json({ 
+      message: "Teacher details retrieved successfully", 
+      teacher: { name, mobile, password } 
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
 
 
 module.exports = {
@@ -283,5 +303,6 @@ module.exports = {
   verifyOtppasscode,
   forgotPassword,
   resetPassword,
-  updateTeacherDetailsById
+  updateTeacherDetailsById,
+  getTeacherDetailsById
 };

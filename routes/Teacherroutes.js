@@ -8,6 +8,7 @@ const {
   forgotPassword,
   resetPassword,
   updateTeacherDetailsById,
+  getTeacherDetailsById,
   
 } = require("../controllers/TeacherController");
 const router = express.Router();
@@ -20,5 +21,6 @@ router.post("/verify-session", verifySession);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 router.post("/edit",updateTeacherDetailsById);
+router.post("/getteacherDetails",getTeacherDetailsById);
 
 module.exports = router;
