@@ -50,8 +50,8 @@ exports.studentlogin = async (req, res) => {
     const currentDate = new Date(); // Current date
     const formattedCurrentDate = formatDateToDDMMYYYY(currentDate);
     const formattedPaperDate = formatDateToDDMMYYYY(new Date(paper.date));
-
- 
+     
+console.log("", formattedCurrentDate, formattedPaperDate)
     if (formattedCurrentDate !== formattedPaperDate) {
       return res.status(400).json({ message: 'No paper available on this date.' });
     }
