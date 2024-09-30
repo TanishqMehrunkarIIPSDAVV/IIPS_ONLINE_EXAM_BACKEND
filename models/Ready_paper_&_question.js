@@ -19,12 +19,18 @@ const ReadyPaperSchema = new mongoose.Schema({
   // Add these fields to handle the full start and end time of the paper
   startTime: Date, // The full start time as a Date object
   endTime: Date,   // The full end time as a Date object
-  
+
+  studentIds: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Student",
+  },
+
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
+
 
 const ReadyQuestionSchema = new mongoose.Schema({
   paperId: {

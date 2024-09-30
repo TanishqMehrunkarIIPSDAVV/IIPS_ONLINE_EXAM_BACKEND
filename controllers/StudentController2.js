@@ -3,6 +3,7 @@ const {
     ReadyPaper,
     ReadyQuestion,
   } = require("../models/Ready_paper_&_question");
+const Response = require('../models/Reponse');
 
 exports.getStudentDetailsByStudentId = async(req,res)=>
 {
@@ -122,3 +123,31 @@ exports.getQuestionNavigation = async (req, res) => {
       res.status(500).send("Server Error");
     }
   };
+
+  //submiting Paper
+
+  exports.submit=async (req, res) => {
+    const { teacherId, studentId, paperId, questions } = req.body;
+  
+    if (!teacherId || !studentId || !paperId || !questions) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+  
+    try {
+      // Create a new response document
+      const newResponse = new Response({
+        teacherId,
+        studentId,
+        paperId,
+        questions, 
+      });
+  
+    
+      await newResponse.save();
+  
+      res.status(200).json({ message: "Response submitted successfully!" });
+    } catch (error) {
+      console.error("Error saving response:", error);
+      res.status(500).json({ message: "Error submitting response" });
+    }
+  }
