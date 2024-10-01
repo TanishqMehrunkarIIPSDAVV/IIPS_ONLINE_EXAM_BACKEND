@@ -34,7 +34,7 @@ exports.studentlogin = async (req, res) => {
   } = req.body;
 
   try {
-    // Validate student details in the student database
+  
     const student = await Student.findOne({
       className: className,
       semester: `${semester}th_sem`,
@@ -50,7 +50,7 @@ exports.studentlogin = async (req, res) => {
       });
     }
 
-    // Find paper by className, semester, and subjectCode
+
     const paper = await ReadyPaper.findOne({
       className: className,
       semester: `${semester}th Sem`,
