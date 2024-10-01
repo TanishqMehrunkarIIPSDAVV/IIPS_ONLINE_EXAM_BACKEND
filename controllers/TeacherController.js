@@ -290,11 +290,11 @@ const getTeacherDetailsById = async (req, res) => {
       return res.status(404).json({ error: "Teacher not found" });
     }
 
-    const { name, mobile, password } = teacher;
+
 
     res.status(200).json({ 
       message: "Teacher details retrieved successfully", 
-      teacher: { name, mobile, password } 
+      teacher
     });
   } catch (error) {
     res.status(500).json({ error: "Server error" });
