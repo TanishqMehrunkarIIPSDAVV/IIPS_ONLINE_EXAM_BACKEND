@@ -6,6 +6,7 @@ const {
 } = require("../config/nodemailer");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+const { log } = require("console");
 
 const signUp = async (req, res) => {
   const { name, email, mobileNumber, password } = req.body;
@@ -254,26 +255,24 @@ const resetPassword = async (req, res) => {
 
 
 const updateTeacherDetailsById = async (req, res) => {
-  const { _id, name, mobile, password } = req.body;
+  const { teacherId, name, mobile_no, password, email } = req.body;
 
-  let updateFields = { name, mobile }; // Start with name and mobile
+  let updateFields = { name, mobile: mobile_no, email }; // Starting with name, email and mobile
 
   // Hash the password only if it's provided
   if (password) {
     const hashedPassword = await bcrypt.hash(password, 10);
     updateFields.password = hashedPassword;
   }
-
   try {
     const teacher = await Teacher.findOneAndUpdate(
-      { _id: _id },
+      { _id: teacherId },
       updateFields, // Only the fields that need to be updated
     );
 
     if (!teacher) {
       return res.status(404).json({ error: "Teacher not found" });
     }
-
     res.status(200).json({ message: "Teacher updated successfully", teacher });
   } catch (error) {
     res.status(500).json({ error: "Server error" });
