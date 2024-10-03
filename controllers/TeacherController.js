@@ -256,7 +256,7 @@ const resetPassword = async (req, res) => {
 
 const updateTeacherDetailsById = async (req, res) => {
   const { teacherId, name, mobile_no, password, email } = req.body;
-  console.log(req.body);
+
   let updateFields = { name, mobile: mobile_no, email }; // Starting with name, email and mobile
 
   // Hash the password only if it's provided
@@ -269,16 +269,12 @@ const updateTeacherDetailsById = async (req, res) => {
       { _id: teacherId },
       updateFields, // Only the fields that need to be updated
     );
-    console.log(updateFields);
 
     if (!teacher) {
-      console.log("teacher not found");
       return res.status(404).json({ error: "Teacher not found" });
     }
-
     res.status(200).json({ message: "Teacher updated successfully", teacher });
   } catch (error) {
-    console.log("catch");
     res.status(500).json({ error: "Server error" });
   }
 };
