@@ -8,7 +8,8 @@ const {
   ReadyPaper,
   ReadyQuestion,
 } = require("../models/Ready_paper_&_question");
-const CompletedPapers = require("../models/Completed_papers");
+const { CompletedPaper } = require("../models/Completed_papers");
+
 
 // Create a new paper
 exports.createPaper = async (req, res) => {
@@ -558,7 +559,7 @@ exports.getCompletedPapersByTeacherId = async (req, res) => {
   try {
     const { teacherId } = req.body; // Get teacherId from the request body
 
-    const papers = await CompletedPapers.find({ teacherId });
+    const papers = await CompletedPaper.find({ teacherId });
 
     if (!papers.length) {
       return res.status(404).json({ msg: "No papers found for this teacher" });
