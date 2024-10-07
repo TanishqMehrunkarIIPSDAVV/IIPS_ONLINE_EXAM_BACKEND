@@ -647,3 +647,17 @@ exports.getQuestionsDetailsByQuestionId= async(req,res)=>
         res.status(500).send("Server Error");
     }
 }
+
+exports.getCompletedPaperByPaperId = async(req,res)=>
+{
+  try
+  {
+    const {paperId} = req.body;
+    const paper = await CompletedPaper.findOne({_id: paperId});
+    res.status(200).json({students: paper.studentIds});
+  }
+  catch(err)
+    {
+      return res.status(500).json({error: err});
+    }
+}

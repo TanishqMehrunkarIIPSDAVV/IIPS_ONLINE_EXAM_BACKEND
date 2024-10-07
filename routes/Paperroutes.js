@@ -20,7 +20,8 @@ const {
   getReadyQuestionPapersByTeacherId,
   editReadyQuestion,
   getQuestionsDetailsByQuestionId,
-  getCompletedPapersByTeacherId
+  getCompletedPapersByTeacherId,
+  getCompletedPaperByPaperId,
 } = require("../controllers/PaperController");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
@@ -84,5 +85,8 @@ router.post("/getQuestionsDetailsByQuestionId",getQuestionsDetailsByQuestionId);
 
 // Get Completed Papers By Teacher I'd
 router.post("/getCompletedPapersByTeacherId", getCompletedPapersByTeacherId);
+
+//get Completed Paper By Paper Id
+router.post("/getCompletedPaperByPaperId",getCompletedPaperByPaperId);
 
 module.exports = router;
