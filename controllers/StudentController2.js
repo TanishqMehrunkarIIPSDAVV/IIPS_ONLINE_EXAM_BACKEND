@@ -4,6 +4,7 @@ const {
     ReadyQuestion,
   } = require("../models/Ready_paper_&_question");
 const Response = require('../models/Reponse');
+const { CompletedPaper } = require('../models/Completed_papers');
 
 exports.getStudentDetailsByStudentId = async(req,res)=>
 {
@@ -149,5 +150,26 @@ exports.getQuestionNavigation = async (req, res) => {
     } catch (error) {
       console.error("Error saving response:", error);
       res.status(500).json({ message: "Error submitting response" });
+    }
+  }
+
+  //get Students by Paper Id
+
+  exports.getStudentByPaperId = async (req,res)=>
+  {
+    try
+    {
+        const {paperId} = req.body;
+        const paper = await CompletedPaper.findOne({_id: paperId});
+        let paperSem = paper.semester;
+        paperSemArr=paperSem.split(" ");
+        paperSemArr[1] = paperSemArr[1].toLowerCase();
+        paperSem = paperSemArr.join("_");
+        const students = await Student.find({className: paper.className, semester: paperSem});
+        res.status(200).json({students: students});
+    }
+    catch(err)
+    {
+        return res.status(500).json({error: err});
     }
   }

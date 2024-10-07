@@ -5,7 +5,8 @@ const { getStudentDetailsByStudentId,
         getQuestionById,
         getFirstQuestionByPaperId,
         getQuestionByPaperId, 
-        submit
+        submit,
+        getStudentByPaperId,
     } = require("../controllers/StudentController2");
 const { compileAndRunCode } = require("../controllers/Compiler");
 
@@ -20,6 +21,7 @@ router.post("/getQuestionNavigation",getQuestionNavigation);
 router.post("/getQuestionByPaperId",getQuestionByPaperId);
 router.post("/compile",compileAndRunCode);
 router.post("/submitResponse",submit);
+router.post("/getStudentByPaperId",getStudentByPaperId);
 
 module.exports = router;
 
