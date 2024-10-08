@@ -9,6 +9,7 @@ const { getStudentDetailsByStudentId,
         getStudentByPaperId,
         getFirstCompletedQuestionByPaperId,
         getResponse,
+        getCompletedQuestionNavigation,
     } = require("../controllers/StudentController2");
 const { compileAndRunCode } = require("../controllers/Compiler");
 
@@ -26,5 +27,6 @@ router.post("/submitResponse",submit);
 router.post("/getStudentByPaperId",getStudentByPaperId);
 router.post("/getFirstCompletedQuestionByPaperId",getFirstCompletedQuestionByPaperId);
 router.post("/getresponse", getResponse);
+router.post("/getCompletedQuestionNavigation",getCompletedQuestionNavigation);
 module.exports = router;
 
