@@ -8,7 +8,7 @@ const {
   ReadyPaper,
   ReadyQuestion,
 } = require("../models/Ready_paper_&_question");
-const { CompletedPaper } = require("../models/Completed_papers");
+const { CompletedPaper, CompletedQuestion } = require("../models/Completed_papers");
 
 
 // Create a new paper
@@ -173,7 +173,7 @@ exports.duplicateQuestion = async (req, res) => {
       return obj;
     }, {});
 
-  console.log(filteredKeyData);
+
 
   try {
     const question = new Question(filteredKeyData);
@@ -661,3 +661,20 @@ exports.getCompletedPaperByPaperId = async(req,res)=>
       return res.status(500).json({error: err});
     }
 }
+
+exports.getCompletedQuestionsDetailsByQuestionId= async(req,res)=>
+  {
+      try
+      {
+          const {questionId} = req.body;
+          const question = await CompletedQuestion.findOne({_id : questionId});
+        
+          if(!question) return res.status(404).json({msg: "No question found for this question id!!!"});
+          res.status(200).json({question});
+      }
+      catch(error)
+      {
+          console.error(error.message);
+          res.status(500).send("Server Error");
+      }
+  }

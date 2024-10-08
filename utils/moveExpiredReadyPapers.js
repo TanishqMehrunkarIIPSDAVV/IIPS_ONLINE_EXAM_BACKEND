@@ -6,13 +6,18 @@ const { CompletedPaper, CompletedQuestion } = require("../models/Completed_paper
 const Response = require("../models/Reponse");
 
 const moveExpiredReadyPapers = async () => {
-  const thirtyMinutesAgo = new Date(new Date() - 30 * 60 * 1000); // Current time - 30 minutes
-    console.log("running" , thirtyMinutesAgo);
+  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000); // Current time - 30 minutes
+
   try {
     // Find all ReadyPapers whose endTime is more than 30 minutes ago
     const expiredPapers = await ReadyPaper.find({
       endTime: { $lt: thirtyMinutesAgo },
     });
+
+    if (expiredPapers.length === 0) {
+      console.log("No expired papers to move.");
+      return;
+    }
 
     // Loop over each expired paper and move it to CompletedPaper
     for (const readyPaper of expiredPapers) {
@@ -31,7 +36,7 @@ const moveExpiredReadyPapers = async () => {
         marks: readyPaper.marks,
         testType: readyPaper.testType,
         teacherId: readyPaper.teacherId,
-        questionIds: readyPaper.questionIds,
+        questionIds: "", // Initialize as empty string
         startTime: readyPaper.startTime,
         endTime: readyPaper.endTime,
         studentIds: readyPaper.studentIds,
@@ -39,8 +44,13 @@ const moveExpiredReadyPapers = async () => {
 
       await completedPaper.save();
 
+      // Mapping from ReadyQuestion ID to CompletedQuestion ID
+      const questionIdMap = new Map();
+
       // Migrate the questions and maintain order
       let previousQuestionId = null;
+      let questionIds = [];
+
       for (let question of readyQuestions) {
         const completedQuestion = new CompletedQuestion({
           paperId: completedPaper._id,
@@ -55,16 +65,54 @@ const moveExpiredReadyPapers = async () => {
 
         const savedQuestion = await completedQuestion.save();
 
+        // Map the ReadyQuestion ID to the CompletedQuestion ID
+        questionIdMap.set(question._id.toString(), savedQuestion._id.toString());
+
         // Update the previous question to link to the current one
         if (previousQuestionId) {
-          await CompletedQuestion.findByIdAndUpdate(previousQuestionId, { nextQuestionId: savedQuestion._id });
+          await CompletedQuestion.findByIdAndUpdate(previousQuestionId, {
+            nextQuestionId: savedQuestion._id,
+          });
         }
 
         previousQuestionId = savedQuestion._id;
+
+        // Add the saved question ID to the array as a string
+        questionIds.push(savedQuestion._id.toString());
       }
 
-      // Update paperId in student responses
-      await Response.updateMany({ paperId: readyPaperId }, { paperId: completedPaper._id });
+      // Convert array of question IDs to a comma-separated string
+      if (questionIds.length > 0) {
+        completedPaper.questionIds = questionIds.join(',');
+      }
+
+      await completedPaper.save();
+
+      // Update paperId in Response documents
+      await Response.updateMany(
+        { paperId: readyPaperId },
+        { paperId: completedPaper._id }
+      );
+
+      // Update questionId in Response documents
+      const responses = await Response.find({ paperId: completedPaper._id });
+
+      for (const response of responses) {
+        let updated = false;
+
+        response.questions.forEach((questionResponse) => {
+          const oldQuestionId = questionResponse.questionId.toString();
+          const newQuestionId = questionIdMap.get(oldQuestionId);
+          if (newQuestionId) {
+            questionResponse.questionId = newQuestionId;
+            updated = true;
+          }
+        });
+
+        if (updated) {
+          await response.save();
+        }
+      }
 
       // Delete the original ReadyPaper and its questions
       await ReadyPaper.findByIdAndDelete(readyPaperId);

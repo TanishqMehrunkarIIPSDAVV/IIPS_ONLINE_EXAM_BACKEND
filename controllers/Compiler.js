@@ -45,7 +45,7 @@ exports.compileAndRunCode = async (req, res) => {
     Axios(config)
         .then((response) => {
             res.json(response.data.run);  // Send the run object directly
-            console.log(response.data);
+    
         }).catch((error) => {
             console.log(error);
             res.status(500).send({ error: "Something went wrong" });

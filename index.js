@@ -45,7 +45,7 @@ app.use("/paper", PaperRoutes);
 app.use("/student",StudentRoutes);
 //cleaning session
 setInterval(removeExpiredSessions, 30 * 60 * 1000); // every 30 min
-setInterval(moveExpiredReadyPapers, 30 * 60 * 1000); // every 30 min
+setInterval(moveExpiredReadyPapers, 1 * 60 * 1000); // every 30 min
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
