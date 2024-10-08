@@ -244,3 +244,51 @@ exports.getResponse = async (req, res) => {
     return res.status(500).json({ message: "Server error", error });
   }
 };
+
+exports.getCompletedQuestionNavigation = async (req, res) => {
+  try {
+    const { questionId, direction } = req.body;
+
+    const currentQuestion = await CompletedQuestion.findById(questionId);
+    if (!currentQuestion) {
+      return res.status(404).json({ message: "Current question not found!" });
+    }
+
+    let nextQuestion = null;
+
+    if (direction === "next") {
+      if (!currentQuestion.nextQuestionId) {
+        return res.status(404).json({ message: "No next question available!" });
+      }
+      nextQuestion = await CompletedQuestion.findById(
+        currentQuestion.nextQuestionId
+      );
+    } else if (direction === "previous") {
+      if (!currentQuestion.previousQuestionId) {
+        return res
+          .status(404)
+          .json({ message: "No previous question available!" });
+      }
+      nextQuestion = await CompletedQuestion.findById(
+        currentQuestion.previousQuestionId
+      );
+    } else {
+      return res
+        .status(400)
+        .json({ message: "Invalid direction! Use 'previous' or 'next'." });
+    }
+
+    if (!nextQuestion) {
+      return res
+        .status(404)
+        .json({ message: "No question found for the requested navigation!" });
+    }
+
+    res
+      .status(200)
+      .json({ question: nextQuestion, message: "Found Navigated Question" });
+  } catch (error) {
+    console.error("Error fetching navigated question:", error);
+    res.status(500).send("Server Error");
+  }
+};
