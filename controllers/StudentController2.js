@@ -147,12 +147,12 @@ exports.getQuestionByPaperId = async (req, res) => {
 exports.submit = async (req, res) => {
   const { teacherId, studentId, paperId, questions } = req.body;
 
-  if (!teacherId || !studentId || !paperId || !questions) {
-    return res.status(400).json({ message: "Missing required fields" });
+  if (!teacherId || !studentId || !paperId || !questions || !Array.isArray(questions)) {
+    return res.status(400).json({ message: "Missing or invalid required fields" });
   }
 
   try {
-    // Create a new response document
+    // Prepare the response document
     const newResponse = new Response({
       teacherId,
       studentId,
@@ -160,15 +160,16 @@ exports.submit = async (req, res) => {
       questions,
     });
 
+    // Save the new response document
     await newResponse.save();
 
+    // Send success response
     res.status(200).json({ message: "Response submitted successfully!" });
   } catch (error) {
     console.error("Error saving response:", error);
     res.status(500).json({ message: "Error submitting response" });
   }
 };
-
 //get Students by Paper Id
 
 exports.getStudentByPaperId = async (req, res) => {

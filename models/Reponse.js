@@ -1,10 +1,15 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+const outputschema = new Schema({
+  stdout:String,
+  stderr:String
+});
+
 const runHistorySchema = new Schema({
   input: String,
   code: String,
-  output: String,
+  output: outputschema,
   timestamp: { type: Date, default: Date.now },
 });
 
