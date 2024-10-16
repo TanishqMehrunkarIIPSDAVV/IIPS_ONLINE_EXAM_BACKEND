@@ -4,7 +4,7 @@ const StudentSchema = new mongoose.Schema({
   className: {
     type: String,
     required: true,
-    enum: ['MTECH', 'MCA'], // You can add more classes if needed
+    enum: ["MTECH", "MCA"], // You can add more classes if needed
   },
   semester: {
     type: String,
