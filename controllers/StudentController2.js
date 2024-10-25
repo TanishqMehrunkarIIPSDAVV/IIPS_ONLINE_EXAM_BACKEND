@@ -293,3 +293,50 @@ exports.getCompletedQuestionNavigation = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+
+
+
+exports.allocatemarks = async (req, res) => {
+  const { paperId, studentId, questionId, marks } = req.body;
+
+  try {
+
+    // Find the specific question in the ReadyQuestion database to get the max marks
+    const question = await CompletedQuestion.findOne({ _id: questionId });
+    if (!question) {
+      return res.status(404).json({ message: 'Question not found' });
+    }
+
+    // Check if the requested marks are within the allowable limit
+    if (marks > question.marks) {
+      return res.status(400).json({ message: `Marks cannot exceed ${question.marks}` });
+    }
+
+    // Find the specific response for the student and paper
+    const response = await Response.findOne({
+      paperId,
+      studentId,
+      'questions.questionId': questionId,
+    });
+
+    if (!response) {
+      return res.status(404).json({ message: 'Response not found' });
+    }
+
+    // Find the specific question and update its marks
+    const questionResponse = response.questions.find(
+      (q) => q.questionId.toString() === questionId
+    );
+    if (questionResponse) {
+      questionResponse.marks = marks;
+      await response.save();
+      return res.status(200).json({ message: 'Marks allocated successfully' });
+    } else {
+      return res.status(404).json({ message: 'Question not found in response' });
+    }
+  } catch (error) {
+    console.error('Error allocating marks:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

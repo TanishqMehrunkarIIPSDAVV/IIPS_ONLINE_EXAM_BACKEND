@@ -23,8 +23,12 @@ const {
   getCompletedPapersByTeacherId,
   getCompletedPaperByPaperId,
   getCompletedQuestionsDetailsByQuestionId,
+  evaluate,
+  evaluatePaper,
 } = require("../controllers/PaperController");
 const multer = require("multer");
+const { sendResultsToAttemptedStudents } = require("../config/nodemailer");
+
 const upload = multer({ dest: "uploads/" });
 
 const router = express.Router();
@@ -91,5 +95,8 @@ router.post("/getCompletedPapersByTeacherId", getCompletedPapersByTeacherId);
 router.post("/getCompletedPaperByPaperId",getCompletedPaperByPaperId);
 
 router.post("/getCompletedQuestion",getCompletedQuestionsDetailsByQuestionId);
+router.post("/evaluate_status",evaluate)
+router.post("/paper_evaluate_status",evaluatePaper)
+router.post("/sendmailtostudent",sendResultsToAttemptedStudents)
 
 module.exports = router;

@@ -1,5 +1,6 @@
 const Paper = require("../models/Paper");
 const Question = require("../models/Question");
+const Response = require("../models/Reponse");
 const multer = require("multer");
 const cloudinary = require("../config/cloudinary");
 const upload = multer({ dest: "uploads/" });
@@ -677,4 +678,122 @@ exports.getCompletedQuestionsDetailsByQuestionId= async(req,res)=>
           console.error(error.message);
           res.status(500).send("Server Error");
       }
+  }
+
+    exports.evaluate=async (req, res) => {
+    try {
+      const { studentId, paperId } = req.body;
+  
+      // Find the response document for the provided studentId and paperId
+      const response = await Response.findOne({ studentId, paperId }).populate('questions.questionId');
+  
+      if (!response) {
+        return res.status(200).json({ status: 'Not Attempted' });
+      }
+  
+      // Flags for marks checking
+      let hasEvaluatedMarks = true;
+      let hasNonNullMarks = false;
+      let totalMarks = 0;
+  
+      // Iterate through each question to determine the evaluation status
+      response.questions.forEach((question) => {
+        if (question.marks === null) {
+          hasEvaluatedMarks = false;
+        } else {
+          hasNonNullMarks = true;
+          totalMarks += question.marks;
+        }
+      });
+  
+      // Determine response status based on flags
+      if (!hasNonNullMarks) {
+        return res.status(200).json({ status: 'Not Evaluated' });
+      } else if (!hasEvaluatedMarks) {
+        return res.status(200).json({ status: 'Evaluation in Progress' });
+      } else {
+        return res.status(200).json({ status: 'Evaluated', totalMarks });
+      }
+    } catch (error) {
+      console.error('Error in evaluation:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+
+  exports.evaluatePaper = async (req, res) => {
+    try {
+      const { paperId } = req.body;
+  
+      // Find the paper by paperId
+      const paper = await CompletedPaper.findById(paperId);
+  
+      if (!paper) {
+        return res.status(404).json({ error: 'Paper not found' });
+      }
+  
+      const { studentIds } = paper; // Array of studentIds
+  
+      let paperEvaluated = true;
+      let paperInProgress = false;
+  
+      // Iterate through each studentId to evaluate their responses
+      for (let i = 0; i < studentIds.length; i++) {
+        const studentId = studentIds[i];
+  
+        // Find the response document for this studentId and paperId
+        const response = await Response.findOne({ studentId, paperId }).populate('questions.questionId');
+  
+        if (response) {
+          let hasEvaluatedMarks = true;
+          let hasNonNullMarks = false;
+  
+          // Check each question in the response to determine the evaluation status
+          response.questions.forEach((question) => {
+            if (question.marks === null) {
+              hasEvaluatedMarks = false;
+            } else {
+              hasNonNullMarks = true;
+            }
+          });
+  
+          // If there are any non-null marks but not all questions are evaluated, mark paper in progress
+          if (!hasEvaluatedMarks && hasNonNullMarks) {
+            paperInProgress = true;
+          }
+  
+          // If no questions have non-null marks, mark paper as not evaluated
+          if (!hasNonNullMarks) {
+            paperEvaluated = false;
+          }
+  
+          // If any question is not fully evaluated, mark paper as in progress
+          if (!hasEvaluatedMarks) {
+            paperEvaluated = false;
+          }
+        } else {
+          // If there's no response, mark the paper as not evaluated
+          paperEvaluated = false;
+        }
+      }
+  
+      // Determine and update the paper evaluation status
+      if (paperEvaluated) {
+        paper.evaluationStatus = 'Evaluated';
+      } else if (paperInProgress) {
+        paper.evaluationStatus = 'Evaluation-in-Progress';
+      } else {
+        paper.evaluationStatus = 'Not-Evaluated';
+      }
+  
+      // Save the updated paper document
+      await paper.save();
+  
+      return res.status(200).json({
+        status: paper.evaluationStatus,
+        message: `Paper evaluation updated to: ${paper.evaluationStatus}`,
+      });
+    } catch (error) {
+      console.error('Error in paper evaluation:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
   }

@@ -17,6 +17,7 @@ const questionResponseSchema = new Schema({
   questionId: { type: Schema.Types.ObjectId, ref: 'Question', required: true },
   finalCode: String,
   runHistory: [runHistorySchema],
+  marks: { type: Number, default: null },
 });
 
 const responseSchema = new Schema({

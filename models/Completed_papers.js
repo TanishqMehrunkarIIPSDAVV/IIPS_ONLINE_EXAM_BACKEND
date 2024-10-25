@@ -20,6 +20,11 @@ const CompletedPaperSchema = new mongoose.Schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: "Student",
   },
+  evaluationStatus: {
+    type: String,
+    enum: ["Evaluated", "Not-Evaluated", "Evaluation-in-Progress"], // Restricted to these values
+    default: "Not-Evaluated", // Default value when creating a paper
+  },
   createdAt: {
     type: Date,
     default: Date.now,
