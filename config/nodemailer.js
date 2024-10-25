@@ -1,15 +1,30 @@
 require("dotenv").config();
 const nodemailer = require("nodemailer");
 const { CompletedPaper } = require("../models/Completed_papers");
+const mongoose = require("mongoose");
 
 // Create a Nodemailer transporter using SMTP
 const transporter = nodemailer.createTransport({
-  service: "gmail", // or your preferred email service
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true, // true for 465, false for other ports
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 });
+
+// Function to verify transporter connection
+async function verifyTransporter() {
+  try {
+    await transporter.verify();
+    console.log("SMTP server is ready to take our messages");
+  } catch (error) {
+    console.error("Error connecting to SMTP server:", error);
+    throw new Error("Failed to connect to the email server. Check your configuration.");
+  }
+}
+
 
 // Function to send OTP via email
 exports.sendOtpToEmail = async (email, otp, text) => {
@@ -41,16 +56,19 @@ exports.sendResetLinkToEmail = async (email, resetLink) => {
   }
 };
 
-exports.sendResultsToAttemptedStudents = async (paperId, students, evaluationStatus) => {
+exports.sendResultsToAttemptedStudents = async (req, res) => {
   try {
-    // Retrieve paper details from CompletedPaper collection
-    const paperDetails = await CompletedPaper.findById(paperId);
+    const { paperId, students, evaluationStatus } = req.body;
+
+    // Fetch paper details from the CompletedPaper collection
+    const paperDetails = await CompletedPaper.findById(paperId).exec();
 
     if (!paperDetails) {
       console.error("No paper found for the given ID:", paperId);
-      throw new Error("Paper details not found.");
+      return res.status(404).json({ message: "Paper details not found." });
     }
 
+    // Prepare paper info for the email content
     const paperInfo = {
       className: paperDetails.className,
       semester: paperDetails.semester,
@@ -64,43 +82,35 @@ exports.sendResultsToAttemptedStudents = async (paperId, students, evaluationSta
     };
 
     console.log("Paper Info:", paperInfo);
-    console.log("Students to evaluate:", students);
-    console.log("Evaluation Status:", evaluationStatus);
 
-    // Loop through students who have attempted the paper
+    // Process each student in the list
     for (const student of students) {
       const { _id, fullName, email } = student;
       const status = evaluationStatus[_id];
 
       if (status && status.status === "Evaluated") {
         const mailBody = `
-          Dear ${fullName},
-
-          We are pleased to inform you that your results for the recent ${paperInfo.testType} in ${paperInfo.subject} (${paperInfo.subjectCode}) have been evaluated.
-
-          Here are the details of your test:
-          - **Class**: ${paperInfo.className}, Semester ${paperInfo.semester}
-          - **Subject**: ${paperInfo.subject} (${paperInfo.subjectCode})
-          - **Date**: ${paperInfo.date}
-          - **Time**: ${paperInfo.time}
-          - **Duration**: ${paperInfo.duration}
-          - **Total Marks**: ${paperInfo.totalMarks}
-          
-          You have been awarded a total of **${status.totalMarks} marks**.
-
-          If you have any questions regarding your evaluation, please feel free to reach out.
-
-          Best regards,
-          [Your School's Name]  
-          [Contact Information]
+          <p>Dear ${fullName},</p>
+          <p>We are pleased to inform you that your results for the recent ${paperInfo.testType} in ${paperInfo.subject} (${paperInfo.subjectCode}) have been evaluated.</p>
+          <p>Here are the details of your test:</p>
+          <ul>
+            <li><strong>Class:</strong> ${paperInfo.className}, Semester ${paperInfo.semester}</li>
+            <li><strong>Subject:</strong> ${paperInfo.subject} (${paperInfo.subjectCode})</li>
+            <li><strong>Date:</strong> ${paperInfo.date}</li>
+            <li><strong>Time:</strong> ${paperInfo.time}</li>
+            <li><strong>Duration:</strong> ${paperInfo.duration}</li>
+            <li><strong>Maximum Marks:</strong> ${paperInfo.totalMarks}</li>
+          </ul>
+          <p>You have been awarded a total of <strong>${status.totalMarks} marks</strong> out of ${paperInfo.totalMarks}</p>
+          <p>If you have any questions regarding your evaluation, please feel free to reach out.</p>
+          <p>Best regards,<br>IIPS DAVV<br>nishantkaushal0708@gmail.com</p>
         `;
 
-        // Log email sending details
-        console.log("Sending email to:", email, "with body:", mailBody);
+        console.log("Sending email to:", email);
 
         // Send email with the results
         await transporter.sendMail({
-          from: process.env.EMAIL_USER,
+          from: `"IIPS-DAVV" <${process.env.EMAIL_USER}>`,
           to: email,
           subject: `Your Results for ${paperInfo.subject} - ${paperInfo.testType}`,
           html: mailBody,
@@ -108,11 +118,13 @@ exports.sendResultsToAttemptedStudents = async (paperId, students, evaluationSta
 
         console.log(`Result email sent to ${fullName} at ${email}`);
       } else {
-        console.log(`No email sent for ${fullName}. Status: ${status ? status.status : 'Unknown'}`);
+        console.log(`No email sent for ${fullName}. Status: ${status ? status.status : "Unknown"}`);
       }
     }
+
+    res.status(200).json({ message: "Emails sent successfully to evaluated students." });
   } catch (error) {
     console.error("Error sending result emails:", error);
-    throw new Error("Failed to send result emails to attempted students");
+    res.status(500).json({ message: "Failed to send result emails to attempted students" });
   }
 };

@@ -8,6 +8,7 @@ const teacherSchema = new mongoose.Schema(
     mobileNumber: { type: String, required: true },
     otp: { type: String },
     otpExpiry: { type: Date },
+    photo: { type: String },
     sessions: [
       {
         sessionId: { type: String },

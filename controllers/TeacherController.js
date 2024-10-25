@@ -152,6 +152,7 @@ const verifyOtp = async (req, res) => {
       name: teacher.name,
       email: teacher.email,
       mobileNumber: teacher.mobileNumber,
+      photo:teacher.photo,
     });
   } catch (error) {
     res.status(500).json({ error: "Server error" });
@@ -300,6 +301,33 @@ const getTeacherDetailsById = async (req, res) => {
   }
 };
 
+ const setphoto = async (req, res) => {
+  const { teacherId, photo } = req.body;
+
+  try {
+    // Find the teacher by ID
+    const teacher = await Teacher.findById(teacherId);
+
+    if (!teacher) {
+      return res.status(404).json({ message: 'Teacher not found' });
+    }
+
+    // Update the photo field
+    teacher.photo = photo;
+
+    // Save the updated teacher document
+    await teacher.save();
+
+    res.status(200).json({
+      message: 'Teacher photo updated successfully',
+      teacher
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 
 module.exports = {
   login,
@@ -310,5 +338,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   updateTeacherDetailsById,
-  getTeacherDetailsById
+  getTeacherDetailsById,
+  setphoto
 };

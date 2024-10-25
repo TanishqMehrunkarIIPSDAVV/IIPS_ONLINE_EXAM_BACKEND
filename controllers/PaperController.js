@@ -655,7 +655,7 @@ exports.getCompletedPaperByPaperId = async(req,res)=>
   {
     const {paperId} = req.body;
     const paper = await CompletedPaper.findOne({_id: paperId});
-    res.status(200).json({students: paper.studentIds});
+    res.status(200).json({students: paper.studentIds ,paper});
   }
   catch(err)
     {
