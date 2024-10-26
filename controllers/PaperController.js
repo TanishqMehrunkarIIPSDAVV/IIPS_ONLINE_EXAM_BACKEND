@@ -797,3 +797,20 @@ exports.getCompletedQuestionsDetailsByQuestionId= async(req,res)=>
       res.status(500).json({ error: 'Internal server error' });
     }
   }
+
+  exports.getEmailSent = async (req,res)=>
+  {
+    try
+    {
+      const {paperId} = req.body;
+      const paper = await CompletedPaper.findOne({_id: paperId});
+      if(paper)
+      {
+        res.status(200).json({emailSent: paper.emailSent});
+      }
+    }
+    catch(err)
+    {
+      return res.status(404).json({error: "Some error occurred"});
+    }
+  }

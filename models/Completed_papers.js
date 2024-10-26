@@ -29,6 +29,7 @@ const CompletedPaperSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  emailSent : {type: Boolean, default: false},
 });
 
 const CompletedQuestionSchema = new mongoose.Schema({

@@ -121,10 +121,15 @@ exports.sendResultsToAttemptedStudents = async (req, res) => {
         console.log(`No email sent for ${fullName}. Status: ${status ? status.status : "Unknown"}`);
       }
     }
-
-    res.status(200).json({ message: "Emails sent successfully to evaluated students." });
+    const paper = await CompletedPaper.findOne({_id: paperId});
+    if(paper)
+    {
+        paper.emailSent = true;
+        paper.save();
+    }
+    res.status(200).json({ message: "Emails sent successfully to evaluated students." , emailSent: true});
   } catch (error) {
     console.error("Error sending result emails:", error);
-    res.status(500).json({ message: "Failed to send result emails to attempted students" });
+    res.status(500).json({ message: "Failed to send result emails to attempted students" , emailSent: false});
   }
 };
