@@ -25,6 +25,7 @@ const {
   getCompletedQuestionsDetailsByQuestionId,
   evaluate,
   evaluatePaper,
+  getEmailSent,
 } = require("../controllers/PaperController");
 const multer = require("multer");
 const { sendResultsToAttemptedStudents } = require("../config/nodemailer");
@@ -98,5 +99,6 @@ router.post("/getCompletedQuestion",getCompletedQuestionsDetailsByQuestionId);
 router.post("/evaluate_status",evaluate)
 router.post("/paper_evaluate_status",evaluatePaper)
 router.post("/sendmailtostudent",sendResultsToAttemptedStudents)
+router.post("/getEmailSent",getEmailSent);
 
 module.exports = router;
