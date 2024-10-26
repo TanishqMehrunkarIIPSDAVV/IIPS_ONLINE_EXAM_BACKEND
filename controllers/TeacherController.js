@@ -4,7 +4,7 @@ const {
   sendOtpToEmail,
   sendResetLinkToEmail,
 } = require("../config/nodemailer");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const { log } = require("console");
 
