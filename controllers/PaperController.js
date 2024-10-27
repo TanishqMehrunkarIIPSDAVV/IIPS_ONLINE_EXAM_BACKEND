@@ -11,6 +11,7 @@ const {
 } = require("../models/Ready_paper_&_question");
 const { CompletedPaper, CompletedQuestion } = require("../models/Completed_papers");
 const { utcToZonedTime, format } = require('date-fns-tz');
+const IST_TIMEZONE = 'Asia/Kolkata';
 
 // Create a new paper
 exports.createPaper = async (req, res) => {

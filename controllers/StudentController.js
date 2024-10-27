@@ -4,6 +4,7 @@ const {
 } = require("../models/Ready_paper_&_question");
 const Student = require("../models/Student");
 const Response = require("../models/Reponse");
+const IST_TIMEZONE = 'Asia/Kolkata';
 
 // Helper function to format date to 'dd-mm-yyyy'
 function formatDateToDDMMYYYY(date) {
