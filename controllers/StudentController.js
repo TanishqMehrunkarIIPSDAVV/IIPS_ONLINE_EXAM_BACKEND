@@ -1,40 +1,20 @@
-const {
-  ReadyPaper,
-  ReadyQuestion,
-} = require("../models/Ready_paper_&_question");
+const { ReadyPaper, ReadyQuestion } = require("../models/Ready_paper_&_question");
 const Student = require("../models/Student");
 const Response = require("../models/Reponse");
+const moment = require('moment-timezone');
+
 const IST_TIMEZONE = 'Asia/Kolkata';
 
-// Helper function to format date to 'dd-mm-yyyy'
-function formatDateToDDMMYYYY(date) {
-  const day = `0${date.getUTCDate()}`.slice(-2);
-  const month = `0${date.getUTCMonth() + 1}`.slice(-2);
-  const year = date.getUTCFullYear();
-  return `${day}-${month}-${year}`;
-}
-
-// Helper function to convert time to 24-hour in UTC
-function parseTimeTo24Hour(timeString) {
-  const [hours, minutes] = timeString.split(":").map(Number);
-  const now = new Date();
-  now.setUTCHours(hours, minutes, 0, 0); // Set the hours and minutes in UTC
-  return now;
+// Helper function to format date to 'dd-MM-yyyy' in the specified timezone
+function formatDateToDDMMYYYY(date, timezone = IST_TIMEZONE) {
+  return moment.tz(date, timezone).format('DD-MM-YYYY');
 }
 
 exports.studentlogin = async (req, res) => {
-  const {
-    name,
-    password,
-    rollno,
-    enrollno,
-    subcode,
-    subname,
-    className,
-    semester,
-  } = req.body;
+  const { name, password, rollno, enrollno, subcode, className, semester } = req.body;
 
   try {
+    // Find student based on provided details
     const student = await Student.findOne({
       className: className,
       semester: `${semester}th_sem`,
@@ -50,6 +30,7 @@ exports.studentlogin = async (req, res) => {
       });
     }
 
+    // Find paper for the specified class, semester, and subject
     const paper = await ReadyPaper.findOne({
       className: className,
       semester: `${semester}th Sem`,
@@ -60,41 +41,49 @@ exports.studentlogin = async (req, res) => {
       return res.status(400).json({ message: "Paper not found for this student." });
     }
 
+    // Check if the student has already submitted a response
     const existingResponse = await Response.findOne({
       studentId: student._id,
       paperId: paper._id,
     });
 
     if (existingResponse) {
-      return res.status(403).json({ 
-        message: "You have already submitted the response for this paper. You are not allowed to log in again." 
+      return res.status(403).json({
+        message: "You have already submitted the response for this paper. You are not allowed to log in again."
       });
     }
 
-    const currentDate = new Date();
-    const formattedCurrentDate = formatDateToDDMMYYYY(currentDate);
-    const formattedPaperDate = formatDateToDDMMYYYY(new Date(paper.date));
+    // Date and time validations
+    const currentDateIST = moment.tz(IST_TIMEZONE);
+    const paperDateIST = moment.tz(paper.date, IST_TIMEZONE);
 
-    if (formattedCurrentDate !== formattedPaperDate) {
+    if (currentDateIST.format('DD-MM-YYYY') !== paperDateIST.format('DD-MM-YYYY')) {
       return res.status(400).json({ message: "No paper available on this date." });
     }
 
-    const currentTime = new Date(); // Current time in UTC
-    const paperStartTime = new Date(paper.startTime);
-    const paperEndTime = new Date(paper.endTime);
+    // Current time, start time, and end time in IST
+    const currentTimeIST = moment.tz(IST_TIMEZONE);
+    const paperStartTimeIST = moment.tz(paper.startTime, IST_TIMEZONE);
+    const paperEndTimeIST = moment.tz(paper.endTime, IST_TIMEZONE);
 
-    const earliestLoginTime = new Date(paperStartTime.getTime() - 30 * 60000); // 30 minutes before paper start
+    console.log("Current Time:", currentTimeIST.format('YYYY-MM-DD HH:mm:ss'));
+    console.log("Paper Start Time:", paperStartTimeIST.format('YYYY-MM-DD HH:mm:ss'));
+    console.log("Paper End Time:", paperEndTimeIST.format('YYYY-MM-DD HH:mm:ss'));
 
-    if (currentTime < earliestLoginTime) {
+    // Allow login only 30 minutes before the paper start time
+    const earliestLoginTime = paperStartTimeIST.clone().subtract(30, 'minutes');
+
+    if (currentTimeIST.isBefore(earliestLoginTime)) {
       return res.status(400).json({
         message: "Login allowed only 30 minutes before the paper starts.",
       });
     }
 
-    if (currentTime > paperEndTime) {
+    if (currentTimeIST.isAfter(paperEndTimeIST)) {
       return res.status(400).json({ message: "Login is not allowed after the paper end time." });
     }
 
+    // Add student ID to the paper if not already present
     if (!paper.studentIds.includes(student._id)) {
       paper.studentIds.push(student._id);
       await paper.save();
@@ -108,6 +97,7 @@ exports.studentlogin = async (req, res) => {
       studentId: student._id,
     });
   } catch (error) {
+    console.error("Error during student login:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };

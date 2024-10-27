@@ -6,6 +6,7 @@ const { CompletedPaper, CompletedQuestion } = require("../models/Completed_paper
 const Response = require("../models/Reponse");
 
 const moveExpiredReadyPapers = async () => {
+  // Current time in UTC
   const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000); // Current time - 30 minutes
 
   try {

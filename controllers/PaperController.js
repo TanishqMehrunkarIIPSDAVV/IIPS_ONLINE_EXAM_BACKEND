@@ -4,15 +4,17 @@ const Response = require("../models/Reponse");
 const multer = require("multer");
 const cloudinary = require("../config/cloudinary");
 const upload = multer({ dest: "uploads/" });
+
+const IST_TIMEZONE = 'Asia/Kolkata';
 const fs = require("fs");
 const {
   ReadyPaper,
   ReadyQuestion,
 } = require("../models/Ready_paper_&_question");
 const { CompletedPaper, CompletedQuestion } = require("../models/Completed_papers");
-const { utcToZonedTime, format } = require('date-fns-tz');
-const IST_TIMEZONE = 'Asia/Kolkata';
-
+// const { utcToZonedTime, format } = require('date-fns-tz');
+// const IST_TIMEZONE = 'Asia/Kolkata';
+const moment = require('moment-timezone');
 // Create a new paper
 exports.createPaper = async (req, res) => {
   const {
@@ -368,6 +370,8 @@ exports.getPaperdetailBypaperId = async (req, res) => {
   }
 };
 
+
+
 exports.Create_Ready_Paper = async (req, res) => {
   const { paperId } = req.body;
 
@@ -377,39 +381,48 @@ exports.Create_Ready_Paper = async (req, res) => {
       return res.status(404).json({ message: "Paper not found" });
     }
 
-    // Calculate start and end times of the new paper in UTC
-    const paperStartDate = new Date(paper.date);
-    const [hours, minutes] = paper.time.split(":").map(Number);
-    paperStartDate.setUTCHours(hours - 5, minutes - 30); // Adjust to UTC from IST
+    // Validate and format date and time
+    const paperDate = moment(paper.date).format('YYYY-MM-DD');
+    const paperTime = paper.time;
 
-    const paperEndDate = new Date(paperStartDate);
-    paperEndDate.setUTCHours(paperEndDate.getUTCHours() + paper.duration.hours);
-    paperEndDate.setUTCMinutes(paperEndDate.getUTCMinutes() + paper.duration.minutes);
+    if (!moment(paperDate, 'YYYY-MM-DD', true).isValid() || !moment(paperTime, 'HH:mm', true).isValid()) {
+      console.error("Date or Time Error:", { paperDate, paperTime });
+      return res.status(400).json({ message: "Invalid start date or time format." });
+    }
 
-    // Convert start and end times to IST for display and overlap checking
-    const paperStartTimeIST = format(paperStartDate, 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: IST_TIMEZONE });
-    const paperEndTimeIST = format(paperEndDate, 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: IST_TIMEZONE });
+    // Combine date and time in IST timezone
+    const paperStartDateIST = moment.tz(`${paperDate} ${paperTime}`, 'YYYY-MM-DD HH:mm', IST_TIMEZONE);
 
-    // Check for overlapping papers in IST
+    // Convert start date-time to UTC
+    const paperStartDateUTC = paperStartDateIST.clone().tz('UTC');
+
+    // Calculate the end time based on duration
+    const durationHours = parseInt(paper.duration.hours, 10) || 0;
+    const durationMinutes = parseInt(paper.duration.minutes, 10) || 0;
+    const paperEndDateUTC = paperStartDateUTC.clone().add(durationHours, 'hours').add(durationMinutes, 'minutes');
+
+    // Validate end date
+    if (!paperEndDateUTC.isValid()) {
+      return res.status(400).json({ message: "Invalid end date. Please check the duration values." });
+    }
+
+    // Check for overlapping papers
     const overlappingPaper = await ReadyPaper.findOne({
       className: paper.className,
       semester: paper.semester,
       date: paper.date,
       $or: [
-        {
-          startTime: { $lt: paperEndTimeIST },
-          endTime: { $gt: paperStartTimeIST }
-        }
+        { startTime: { $lt: paperEndDateUTC.toDate() }, endTime: { $gt: paperStartDateUTC.toDate() } }
       ]
     });
 
     if (overlappingPaper) {
-      const overlappingPaperStartTime = format(new Date(overlappingPaper.startTime), 'hh:mm a', { timeZone: IST_TIMEZONE });
-      const overlappingPaperEndTime = format(new Date(overlappingPaper.endTime), 'hh:mm a', { timeZone: IST_TIMEZONE });
+      const overlappingPaperStartTime = moment(overlappingPaper.startTime).tz(IST_TIMEZONE).format('hh:mm A');
+      const overlappingPaperEndTime = moment(overlappingPaper.endTime).tz(IST_TIMEZONE).format('hh:mm A');
 
       return res.status(400).json({
         success: false,
-        message: `A paper is already scheduled for ${paper.className} ${paper.semester} on ${new Date(overlappingPaper.date).toDateString()} from ${overlappingPaperStartTime} to ${overlappingPaperEndTime} for subject ${overlappingPaper.subject}.`,
+        message: `A paper is already scheduled for ${paper.className} ${paper.semester} on ${moment(overlappingPaper.date).format('YYYY-MM-DD')} from ${overlappingPaperStartTime} to ${overlappingPaperEndTime} for subject ${overlappingPaper.subject}.`,
       });
     }
 
@@ -428,13 +441,13 @@ exports.Create_Ready_Paper = async (req, res) => {
       testType: paper.testType,
       teacherId: paper.teacherId,
       questionIds: paper.questionIds,
-      startTime: paperStartDate,
-      endTime: paperEndDate
+      startTime: paperStartDateUTC.toDate(),
+      endTime: paperEndDateUTC.toDate()
     });
 
     await readyPaper.save();
 
-    // Link questions in order
+    // Link questions in a sorted order by marks to form a linked list
     let previousQuestionId = null;
 
     for (let i = 0; i < questions.length; i++) {
@@ -473,6 +486,8 @@ exports.Create_Ready_Paper = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+
 
 exports.deleteReadyPaper =async (req,res)=>{
   
