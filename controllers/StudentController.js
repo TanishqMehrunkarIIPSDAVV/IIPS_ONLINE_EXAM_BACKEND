@@ -6,9 +6,10 @@ const moment = require('moment-timezone');
 const IST_TIMEZONE = 'Asia/Kolkata';
 
 // Helper function to format date to 'dd-MM-yyyy' in UTC
-function formatDateToDDMMYYYY(date, timezone = 'UTC') {
-  return moment.tz(date, timezone).format('DD-MM-YYYY');
+function formatDateToDDMMYYYY(date) {
+  return moment.utc(date).format('DD-MM-YYYY');
 }
+
 
 exports.studentlogin = async (req, res) => {
   const { name, password, rollno, enrollno, subcode, className, semester } = req.body;
@@ -64,8 +65,8 @@ exports.studentlogin = async (req, res) => {
     console.log("Paper Start UTC:", paperStartTimeUTC.format('YYYY-MM-DD HH:mm:ss'));
     console.log("Paper End UTC:", paperEndTimeUTC.format('YYYY-MM-DD HH:mm:ss'));
 
-    // Check if the paper's date matches today's date in UTC
-    const paperDateUTC = formatDateToDDMMYYYY(paper.date, 'UTC');
+    // Compare only the date part of paper's date and current date
+    const paperDateUTC = formatDateToDDMMYYYY(paper.date);
     const currentDateUTC = currentTimeUTC.format('DD-MM-YYYY');
 
     if (currentDateUTC !== paperDateUTC) {
