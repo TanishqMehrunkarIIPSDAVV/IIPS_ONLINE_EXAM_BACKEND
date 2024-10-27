@@ -67,6 +67,7 @@ exports.studentlogin = async (req, res) => {
 
     // Compare only the date part of paper's date and current date
     const paperDateUTC = formatDateToDDMMYYYY(paper.date);
+    console.log("", paperDateUTC)
     const currentDateUTC = currentTimeUTC.format('DD-MM-YYYY');
 
     if (currentDateUTC !== paperDateUTC) {
