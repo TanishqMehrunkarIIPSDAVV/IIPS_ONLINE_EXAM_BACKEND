@@ -387,8 +387,8 @@ exports.Create_Ready_Paper = async (req, res) => {
     paperEndDate.setUTCMinutes(paperEndDate.getUTCMinutes() + paper.duration.minutes);
 
     // Convert start and end times to IST for display and overlap checking
-    const paperStartTimeIST = format(utcToZonedTime(paperStartDate, IST_TIMEZONE), 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: IST_TIMEZONE });
-    const paperEndTimeIST = format(utcToZonedTime(paperEndDate, IST_TIMEZONE), 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: IST_TIMEZONE });
+    const paperStartTimeIST = format(paperStartDate, 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: IST_TIMEZONE });
+    const paperEndTimeIST = format(paperEndDate, 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: IST_TIMEZONE });
 
     // Check for overlapping papers in IST
     const overlappingPaper = await ReadyPaper.findOne({
@@ -404,8 +404,8 @@ exports.Create_Ready_Paper = async (req, res) => {
     });
 
     if (overlappingPaper) {
-      const overlappingPaperStartTime = format(utcToZonedTime(overlappingPaper.startTime, IST_TIMEZONE), 'hh:mm a', { timeZone: IST_TIMEZONE });
-      const overlappingPaperEndTime = format(utcToZonedTime(overlappingPaper.endTime, IST_TIMEZONE), 'hh:mm a', { timeZone: IST_TIMEZONE });
+      const overlappingPaperStartTime = format(new Date(overlappingPaper.startTime), 'hh:mm a', { timeZone: IST_TIMEZONE });
+      const overlappingPaperEndTime = format(new Date(overlappingPaper.endTime), 'hh:mm a', { timeZone: IST_TIMEZONE });
 
       return res.status(400).json({
         success: false,

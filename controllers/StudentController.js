@@ -35,7 +35,6 @@ exports.studentlogin = async (req, res) => {
   } = req.body;
 
   try {
-  
     const student = await Student.findOne({
       className: className,
       semester: `${semester}th_sem`,
@@ -72,7 +71,7 @@ exports.studentlogin = async (req, res) => {
       });
     }
 
-    const currentDate = new Date(); // Current date
+    const currentDate = new Date();
     const formattedCurrentDate = formatDateToDDMMYYYY(currentDate);
     const formattedPaperDate = formatDateToDDMMYYYY(new Date(paper.date));
 
