@@ -1,18 +1,16 @@
-const {
-  ReadyPaper,
-  ReadyQuestion,
-} = require("../models/Ready_paper_&_question");
+const { ReadyPaper, ReadyQuestion } = require("../models/Ready_paper_&_question");
 const { CompletedPaper, CompletedQuestion } = require("../models/Completed_papers");
 const Response = require("../models/Reponse");
+const moment = require('moment-timezone');
 
 const moveExpiredReadyPapers = async () => {
-  // Current time in UTC
-  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000); // Current time - 30 minutes
+  // Current time in UTC, 30 minutes ago
+  const thirtyMinutesAgoUTC = moment.utc().subtract(30, 'minutes').toDate();
 
   try {
-    // Find all ReadyPapers whose endTime is more than 30 minutes ago
+    // Find all ReadyPapers whose endTime is more than 30 minutes ago in UTC
     const expiredPapers = await ReadyPaper.find({
-      endTime: { $lt: thirtyMinutesAgo },
+      endTime: { $lt: thirtyMinutesAgoUTC },
     });
 
     if (expiredPapers.length === 0) {
@@ -25,21 +23,21 @@ const moveExpiredReadyPapers = async () => {
       const readyPaperId = readyPaper._id;
       const readyQuestions = await ReadyQuestion.find({ paperId: readyPaperId });
 
-      // Create the CompletedPaper
+      // Create the CompletedPaper with UTC date properties
       const completedPaper = new CompletedPaper({
         className: readyPaper.className,
         semester: readyPaper.semester,
         subject: readyPaper.subject,
         subjectCode: readyPaper.subjectCode,
-        date: readyPaper.date,
+        date: readyPaper.date, // Already in UTC
         time: readyPaper.time,
         duration: readyPaper.duration,
         marks: readyPaper.marks,
         testType: readyPaper.testType,
         teacherId: readyPaper.teacherId,
         questionIds: "", // Initialize as empty string
-        startTime: readyPaper.startTime,
-        endTime: readyPaper.endTime,
+        startTime: readyPaper.startTime, // Already in UTC
+        endTime: readyPaper.endTime, // Already in UTC
         studentIds: readyPaper.studentIds,
       });
 
@@ -48,7 +46,7 @@ const moveExpiredReadyPapers = async () => {
       // Mapping from ReadyQuestion ID to CompletedQuestion ID
       const questionIdMap = new Map();
 
-      // Migrate the questions and maintain order
+      // Migrate questions and maintain order
       let previousQuestionId = null;
       let questionIds = [];
 
@@ -77,8 +75,6 @@ const moveExpiredReadyPapers = async () => {
         }
 
         previousQuestionId = savedQuestion._id;
-
-        // Add the saved question ID to the array as a string
         questionIds.push(savedQuestion._id.toString());
       }
 
