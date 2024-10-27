@@ -6,8 +6,8 @@ const moment = require('moment-timezone');
 const IST_TIMEZONE = 'Asia/Kolkata';
 
 // Helper function to format date to 'dd-MM-yyyy' in UTC
-function formatDateToDDMMYYYY(date) {
-  return moment.utc(date).format('DD-MM-YYYY');
+function formatDateToDDMMYYYYIST(date) {
+  return moment.tz(date, IST_TIMEZONE).format('DD-MM-YYYY');
 }
 
 
@@ -66,11 +66,12 @@ exports.studentlogin = async (req, res) => {
     console.log("Paper End UTC:", paperEndTimeUTC.format('YYYY-MM-DD HH:mm:ss'));
 
     // Compare only the date part of paper's date and current date
-    const paperDateUTC = formatDateToDDMMYYYY(paper.date);
-    console.log("", paperDateUTC)
-    const currentDateUTC = currentTimeUTC.format('DD-MM-YYYY');
+    const paperDateIST = formatDateToDDMMYYYYIST(paper.date);
+    const currentDateIST = formatDateToDDMMYYYYIST(currentTimeUTC)
+    console.log("Paper Date IST:", paperDateIST);
+    console.log("Current Date IST:", currentDateIST);
 
-    if (currentDateUTC !== paperDateUTC) {
+    if (currentDateIST !== paperDateIST) {
       return res.status(400).json({ message: "No paper available on this date." });
     }
 
