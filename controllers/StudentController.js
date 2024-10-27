@@ -4,6 +4,7 @@ const Response = require("../models/Reponse");
 const moment = require('moment-timezone');
 
 const IST_TIMEZONE = 'Asia/Kolkata';
+const UTC_TIMEZONE = 'UTC';
 
 // Helper function to format date to 'dd-MM-yyyy' in the specified timezone
 function formatDateToDDMMYYYY(date, timezone = IST_TIMEZONE) {
@@ -53,7 +54,16 @@ exports.studentlogin = async (req, res) => {
       });
     }
 
-    // Date and time validations
+    // Convert the paper's start and end times to UTC for consistency
+    const currentTimeUTC = moment.utc();
+    const paperStartTimeUTC = moment.utc(paper.startTime);
+    const paperEndTimeUTC = moment.utc(paper.endTime);
+
+    console.log("Current UTC Time:", currentTimeUTC.format('YYYY-MM-DD HH:mm:ss'));
+    console.log("Paper Start UTC:", paperStartTimeUTC.format('YYYY-MM-DD HH:mm:ss'));
+    console.log("Paper End UTC:", paperEndTimeUTC.format('YYYY-MM-DD HH:mm:ss'));
+
+    // Check if today's date matches the paper's date in IST
     const currentDateIST = moment.tz(IST_TIMEZONE);
     const paperDateIST = moment.tz(paper.date, IST_TIMEZONE);
 
@@ -61,25 +71,16 @@ exports.studentlogin = async (req, res) => {
       return res.status(400).json({ message: "No paper available on this date." });
     }
 
-    // Current time, start time, and end time in IST
-    const currentTimeIST = moment.tz(IST_TIMEZONE);
-    const paperStartTimeIST = moment.tz(paper.startTime, IST_TIMEZONE);
-    const paperEndTimeIST = moment.tz(paper.endTime, IST_TIMEZONE);
-
-    console.log("Current Time:", currentTimeIST.format('YYYY-MM-DD HH:mm:ss'));
-    console.log("Paper Start Time:", paperStartTimeIST.format('YYYY-MM-DD HH:mm:ss'));
-    console.log("Paper End Time:", paperEndTimeIST.format('YYYY-MM-DD HH:mm:ss'));
-
     // Allow login only 30 minutes before the paper start time
-    const earliestLoginTime = paperStartTimeIST.clone().subtract(30, 'minutes');
+    const earliestLoginTimeUTC = paperStartTimeUTC.clone().subtract(30, 'minutes');
 
-    if (currentTimeIST.isBefore(earliestLoginTime)) {
+    if (currentTimeUTC.isBefore(earliestLoginTimeUTC)) {
       return res.status(400).json({
         message: "Login allowed only 30 minutes before the paper starts.",
       });
     }
 
-    if (currentTimeIST.isAfter(paperEndTimeIST)) {
+    if (currentTimeUTC.isAfter(paperEndTimeUTC)) {
       return res.status(400).json({ message: "Login is not allowed after the paper end time." });
     }
 

@@ -4,7 +4,7 @@ const Response = require("../models/Reponse");
 const multer = require("multer");
 const cloudinary = require("../config/cloudinary");
 const upload = multer({ dest: "uploads/" });
-
+const UTC_TIMEZONE = 'UTC';
 const IST_TIMEZONE = 'Asia/Kolkata';
 const fs = require("fs");
 const {
@@ -371,7 +371,6 @@ exports.getPaperdetailBypaperId = async (req, res) => {
 };
 
 
-
 exports.Create_Ready_Paper = async (req, res) => {
   const { paperId } = req.body;
 
@@ -390,23 +389,20 @@ exports.Create_Ready_Paper = async (req, res) => {
       return res.status(400).json({ message: "Invalid start date or time format." });
     }
 
-    // Combine date and time in IST timezone
+    // Combine date and time in IST timezone, then convert to UTC
     const paperStartDateIST = moment.tz(`${paperDate} ${paperTime}`, 'YYYY-MM-DD HH:mm', IST_TIMEZONE);
+    const paperStartDateUTC = paperStartDateIST.clone().tz(UTC_TIMEZONE);
 
-    // Convert start date-time to UTC
-    const paperStartDateUTC = paperStartDateIST.clone().tz('UTC');
-
-    // Calculate the end time based on duration
+    // Calculate the end time based on duration in UTC
     const durationHours = parseInt(paper.duration.hours, 10) || 0;
     const durationMinutes = parseInt(paper.duration.minutes, 10) || 0;
     const paperEndDateUTC = paperStartDateUTC.clone().add(durationHours, 'hours').add(durationMinutes, 'minutes');
 
-    // Validate end date
     if (!paperEndDateUTC.isValid()) {
       return res.status(400).json({ message: "Invalid end date. Please check the duration values." });
     }
 
-    // Check for overlapping papers
+    // Check for overlapping papers in UTC
     const overlappingPaper = await ReadyPaper.findOne({
       className: paper.className,
       semester: paper.semester,
@@ -426,7 +422,6 @@ exports.Create_Ready_Paper = async (req, res) => {
       });
     }
 
-    // Fetch and sort questions by marks
     let questions = await Question.find({ paperId: paperId }).sort({ marks: 1 });
 
     const readyPaper = new ReadyPaper({
@@ -465,7 +460,6 @@ exports.Create_Ready_Paper = async (req, res) => {
 
       const savedQuestion = await readyQuestion.save();
 
-      // Update the previous question to link to the current one
       if (previousQuestionId) {
         await ReadyQuestion.findByIdAndUpdate(previousQuestionId, { nextQuestionId: savedQuestion._id });
       }
@@ -473,7 +467,6 @@ exports.Create_Ready_Paper = async (req, res) => {
       previousQuestionId = savedQuestion._id;
     }
 
-    // Delete the original paper and questions
     await Paper.findByIdAndDelete(paperId);
     await Question.deleteMany({ paperId: paperId });
 
@@ -486,6 +479,7 @@ exports.Create_Ready_Paper = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
 
 
 
