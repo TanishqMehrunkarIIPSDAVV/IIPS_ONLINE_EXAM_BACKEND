@@ -381,7 +381,7 @@ exports.Create_Ready_Paper = async (req, res) => {
     }
 
     // Validate and format date and time
-    const paperDate = moment(paper.date, 'YYYY-MM-DD', true); // Explicit format
+    const paperDate = moment.utc(paper.date).tz(IST_TIMEZONE);; // Explicit format
     const paperTime = moment(paper.time, 'HH:mm', true);
 
     if (!paperDate.isValid() || !paperTime.isValid()) {
@@ -391,7 +391,7 @@ exports.Create_Ready_Paper = async (req, res) => {
 
     // Combine date and time in IST timezone, then convert to UTC
     const paperStartDateIST = moment.tz(`${paperDate.format('YYYY-MM-DD')} ${paperTime.format('HH:mm')}`, 'YYYY-MM-DD HH:mm', IST_TIMEZONE);
-    const paperStartDateUTC = paperStartDateIST.clone().tz(UTC_TIMEZONE);
+const paperStartDateUTC = paperStartDateIST.clone().tz(UTC_TIMEZONE);
 
     // Calculate end time in UTC based on duration
     const durationHours = parseInt(paper.duration.hours, 10) || 0;
