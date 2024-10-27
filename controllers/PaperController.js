@@ -381,19 +381,19 @@ exports.Create_Ready_Paper = async (req, res) => {
     }
 
     // Validate and format date and time
-    const paperDate = moment(paper.date).format('YYYY-MM-DD');
-    const paperTime = paper.time;
+    const paperDate = moment(paper.date, 'YYYY-MM-DD', true); // Explicit format
+    const paperTime = moment(paper.time, 'HH:mm', true);
 
-    if (!moment(paperDate, 'YYYY-MM-DD', true).isValid() || !moment(paperTime, 'HH:mm', true).isValid()) {
+    if (!paperDate.isValid() || !paperTime.isValid()) {
       console.error("Date or Time Error:", { paperDate, paperTime });
-      return res.status(400).json({ message: "Invalid start date or time format." });
+      return res.status(400).json({ message: "Invalid date or time format." });
     }
 
     // Combine date and time in IST timezone, then convert to UTC
-    const paperStartDateIST = moment.tz(`${paperDate} ${paperTime}`, 'YYYY-MM-DD HH:mm', IST_TIMEZONE);
+    const paperStartDateIST = moment.tz(`${paperDate.format('YYYY-MM-DD')} ${paperTime.format('HH:mm')}`, 'YYYY-MM-DD HH:mm', IST_TIMEZONE);
     const paperStartDateUTC = paperStartDateIST.clone().tz(UTC_TIMEZONE);
 
-    // Calculate the end time based on duration in UTC
+    // Calculate end time in UTC based on duration
     const durationHours = parseInt(paper.duration.hours, 10) || 0;
     const durationMinutes = parseInt(paper.duration.minutes, 10) || 0;
     const paperEndDateUTC = paperStartDateUTC.clone().add(durationHours, 'hours').add(durationMinutes, 'minutes');
@@ -467,8 +467,11 @@ exports.Create_Ready_Paper = async (req, res) => {
       previousQuestionId = savedQuestion._id;
     }
 
-    await Paper.findByIdAndDelete(paperId);
-    await Question.deleteMany({ paperId: paperId });
+    // Delete original paper and questions in parallel after saving ready paper
+    await Promise.all([
+      Paper.findByIdAndDelete(paperId),
+      Question.deleteMany({ paperId: paperId })
+    ]);
 
     res.status(200).json({
       success: true,

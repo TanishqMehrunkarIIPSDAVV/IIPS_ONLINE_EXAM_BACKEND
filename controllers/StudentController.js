@@ -4,10 +4,9 @@ const Response = require("../models/Reponse");
 const moment = require('moment-timezone');
 
 const IST_TIMEZONE = 'Asia/Kolkata';
-const UTC_TIMEZONE = 'UTC';
 
-// Helper function to format date to 'dd-MM-yyyy' in the specified timezone
-function formatDateToDDMMYYYY(date, timezone = IST_TIMEZONE) {
+// Helper function to format date to 'dd-MM-yyyy' in UTC
+function formatDateToDDMMYYYY(date, timezone = 'UTC') {
   return moment.tz(date, timezone).format('DD-MM-YYYY');
 }
 
@@ -17,12 +16,12 @@ exports.studentlogin = async (req, res) => {
   try {
     // Find student based on provided details
     const student = await Student.findOne({
-      className: className,
+      className,
       semester: `${semester}th_sem`,
       fullName: name,
       rollNumber: rollno,
       enrollmentNumber: enrollno,
-      password: password,
+      password,
     });
 
     if (!student) {
@@ -33,7 +32,7 @@ exports.studentlogin = async (req, res) => {
 
     // Find paper for the specified class, semester, and subject
     const paper = await ReadyPaper.findOne({
-      className: className,
+      className,
       semester: `${semester}th Sem`,
       subjectCode: subcode,
     });
@@ -50,12 +49,14 @@ exports.studentlogin = async (req, res) => {
 
     if (existingResponse) {
       return res.status(403).json({
-        message: "You have already submitted the response for this paper. You are not allowed to log in again."
+        message: "You have already submitted the response for this paper. You are not allowed to log in again.",
       });
     }
 
-    // Convert the paper's start and end times to UTC for consistency
+    // Current UTC time
     const currentTimeUTC = moment.utc();
+
+    // Paper's start and end times in UTC
     const paperStartTimeUTC = moment.utc(paper.startTime);
     const paperEndTimeUTC = moment.utc(paper.endTime);
 
@@ -63,11 +64,11 @@ exports.studentlogin = async (req, res) => {
     console.log("Paper Start UTC:", paperStartTimeUTC.format('YYYY-MM-DD HH:mm:ss'));
     console.log("Paper End UTC:", paperEndTimeUTC.format('YYYY-MM-DD HH:mm:ss'));
 
-    // Check if today's date matches the paper's date in IST
-    const currentDateIST = moment.tz(IST_TIMEZONE);
-    const paperDateIST = moment.tz(paper.date, IST_TIMEZONE);
+    // Check if the paper's date matches today's date in UTC
+    const paperDateUTC = formatDateToDDMMYYYY(paper.date, 'UTC');
+    const currentDateUTC = currentTimeUTC.format('DD-MM-YYYY');
 
-    if (currentDateIST.format('DD-MM-YYYY') !== paperDateIST.format('DD-MM-YYYY')) {
+    if (currentDateUTC !== paperDateUTC) {
       return res.status(400).json({ message: "No paper available on this date." });
     }
 
