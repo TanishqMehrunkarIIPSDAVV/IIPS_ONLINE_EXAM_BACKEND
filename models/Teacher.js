@@ -8,7 +8,7 @@ const teacherSchema = new mongoose.Schema(
     mobileNumber: { type: String, required: true },
     otp: { type: String },
     otpExpiry: { type: Date },
-    photo: { type: String, default: "./profile_photo.png" },
+    photo: { type: String, default: "http://res.cloudinary.com/duxvbwdf3/image/upload/v1731004725/question/xnykk7ixq6bk2qdrppty.png" },
     sessions: [
       {
         sessionId: { type: String },
